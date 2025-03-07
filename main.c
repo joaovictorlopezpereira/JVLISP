@@ -1,9 +1,10 @@
 #include "parser.h"
-
-// TODO: Make parser work with nested lists. For example, "(+ (* 1 2) 3)";
+#include "eval.h"
 
 int main() {
-  const char* input = "(+ 1 2 3)";
+  const char* input = "(+ 2 3)";
+  // const char* input = "3";
+  // const char* input = "+";
 
   Token* tokens = tokenize(input);
 
@@ -13,7 +14,11 @@ int main() {
 
   SchemeObject* expr = parser(&tokens);
 
-  print_scheme_object(expr);
+  print_scheme_object(expr); printf("\n");
+
+  SchemeObject* result = eval(expr, init_environment());
+
+  print_scheme_object(result);
 
   printf("\n\nFinished executing.");
   return 0;

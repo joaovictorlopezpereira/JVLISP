@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include "object.h"
 #include "tokenizer.h"
+#include "primitives.h"
 
 // Functions Signatures
 SchemeObject* parse_list(Token** tokens);
@@ -32,8 +33,14 @@ SchemeObject* parser(Token** tokens) {
       break;
 
     case TOKEN_SYMBOL:
+    SchemeObject* (*primitive_function)(SchemeObject* args) = get_primitive_function(current_token->value);
+    if (primitive_function != NULL) {
+      expression = make_primitive(primitive_function);
+    }
+    else {
       expression = make_symbol(current_token->value);
-      break;
+    }
+    break;
 
     case TOKEN_EOF:
       expression = make_nil();
@@ -72,4 +79,5 @@ SchemeObject* parse_list(Token** tokens) {
 
   return head->value.pair.cdr;
 }
+
 
