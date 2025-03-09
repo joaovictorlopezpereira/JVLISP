@@ -10,7 +10,7 @@ SchemeObject* make_number(double number);
 SchemeObject* make_symbol(const char* symbol);
 SchemeObject* make_string(const char* string);
 SchemeObject* make_pair(SchemeObject* car, SchemeObject* cdr);
-SchemeObject* make_primitive(SchemeObject* (*func)(SchemeObject* args));
+SchemeObject* make_primitive(SchemeObject* (*func)(SchemeObject* args), const char* string);
 SchemeObject* make_lambda(SchemeObject* params, SchemeObject* body, Environment* env);
 SchemeObject* make_boolean(int value);
 SchemeObject* make_nil();
@@ -50,10 +50,11 @@ SchemeObject* make_pair(SchemeObject* car, SchemeObject* cdr) {
 }
 
 // Creates a Scheme primitive
-SchemeObject* make_primitive(SchemeObject* (*func)(SchemeObject* args)) {
+SchemeObject* make_primitive(SchemeObject* (*func)(SchemeObject* args), const char* string) {
   SchemeObject* object = (SchemeObject*)malloc(sizeof(SchemeObject));
   object->type = SCHEME_PRIMITIVE;
   object->value.primitive = func;
+  object->value.symbol = strdup(string);
   return object;
 }
 
@@ -105,7 +106,6 @@ void free_object(SchemeObject* object) {
   }
   free(object);
 }
-
 
 // Prints the SchemeObject
 void print_scheme_object(SchemeObject* object) {

@@ -31,9 +31,9 @@ Environment* add_variable(Environment* env, char* name, SchemeObject* value) {
 Environment* init_environment() {
   Environment* env = NULL;
 
-  // Add the primitive functions to the environment
-  env = add_variable(env, "+", make_primitive(primitive_add));
-  env = add_variable(env, "-", make_primitive(primitive_sub));
+  // Adds the primitive functions to the environment
+  env = add_variable(env, "+", make_primitive(primitive_add, "+"));
+  env = add_variable(env, "-", make_primitive(primitive_sub, "-"));
 
   return env;
 }
