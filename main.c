@@ -2,14 +2,21 @@
 #include "eval.h"
 
 int main() {
-  // const char* input = "(+ 2 3)"; // not working
-  // const char* input = "+"; // not working
+  const char* input = "(define x 10)"; // not working
+  // const char* input = "(+ 5 (- 4 3) 1)"; //working
+  // const char* input = "(- 5 2 1)"; // working
+  // const char* input = "(+ 2 3 7)"; // working
+  // const char* input = "+"; // working
+  // const char* input = "-"; // working
   // const char* input = "*"; // working!
-  const char* input = "4";    // working!
+  // const char* input = "4";    // working!
 
+
+  printf("INPUT EXPRESSION:\n");
+  printf("%s", input);
+
+  printf("\n\nTOKENIZING:\n");
   Token* tokens = tokenize(input);
-
-  printf("TOKENIZING:\n");
   for (int i = 0; tokens[i].type != TOKEN_EOF; i++) {
     printf("Token Type %d: %s\n", tokens[i].type, tokens[i].value);
   }
