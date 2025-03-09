@@ -31,8 +31,9 @@ Environment* add_variable(Environment* env, char* name, SchemeObject* value) {
 Environment* init_environment() {
   Environment* env = NULL;
 
-  add_variable(env, "+", make_primitive(primitive_add));
-  add_variable(env, "-", make_primitive(primitive_sub));
+  // Add the primitive functions to the environment
+  env = add_variable(env, "+", make_primitive(primitive_add));
+  env = add_variable(env, "-", make_primitive(primitive_sub));
 
   return env;
 }
@@ -42,6 +43,7 @@ Environment* extend_environment(SchemeObject* params, SchemeObject* args, Enviro
   Environment* new_env = NULL;
 
   while (params != NULL && args != NULL) {
+    // Assumes that params is a pair of symbols and args are evaluated
     new_env = add_variable(new_env, params->value.pair.car->value.symbol, eval(args->value.pair.car, env));
     params = params->value.pair.cdr;
     args = args->value.pair.cdr;
@@ -56,10 +58,10 @@ Environment* extend_environment(SchemeObject* params, SchemeObject* args, Enviro
 // Frees the memory allocated by the environment
 void free_environment(Environment* env) {
   while (env != NULL) {
-    free(env->name);
+    free(env->name);   // Free the name string
+    free(env->value);  // Free the SchemeObject value
     Environment* temp = env;
     env = env->next;
     free(temp);
   }
 }
-
