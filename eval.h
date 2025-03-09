@@ -4,6 +4,7 @@
 #include "environment.h"
 
 SchemeObject* eval(SchemeObject* expr, Environment* env) {
+  printf("\neval!\n");
   switch (expr->type) {
     case SCHEME_NUMBER:
     case SCHEME_STRING:
@@ -28,6 +29,7 @@ SchemeObject* eval(SchemeObject* expr, Environment* env) {
         env = add_variable(env, symbol->value.symbol, value);
         return value;
       }
+
       return NULL;
 
     default:
@@ -38,7 +40,8 @@ SchemeObject* eval(SchemeObject* expr, Environment* env) {
 
 SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
   if (func->type == SCHEME_PRIMITIVE) {
-    return func->value.primitive(args);
+    SchemeObject* (*f)(SchemeObject* args) = get_primitive_function(func->value.symbol);
+    return f(args);  // Chama a função primitiva com os argumentos
   }
 
   if (func->type == SCHEME_LAMBDA) {
@@ -48,6 +51,4 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
 
   return NULL;
 }
-
-
 
