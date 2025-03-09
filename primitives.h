@@ -1,35 +1,58 @@
 #pragma once
 
 #include "object.h"
+#include <stdio.h>
+
+// Functions Signatures
+SchemeObject* primitive_sub(SchemeObject* args);
+SchemeObject* primitive_add(SchemeObject* args);
+SchemeObject* (*get_primitive_function(const char* symbol))(SchemeObject* args);
+
 
 // Scheme "-" procedure
 SchemeObject* primitive_sub(SchemeObject* args) {
-  double acc = args->value.pair.car->value.number;
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: - requires at least one argument.\n");
+    exit(1);
+  }
+
+  if (args->value.pair.car->type != SCHEME_NUMBER) {
+    printf("Error: - only operates on numbers.\n");
+    exit(1);
+  }
+
+  double acc = args->value.pair.car->value.number; // Accumulator
   args = args->value.pair.cdr;
 
-  while (args->type == SCHEME_PAIR) {
+  while (args != NULL && args->type == SCHEME_PAIR) {
     if (args->value.pair.car->type != SCHEME_NUMBER) {
-      printf("Error: - only subtracts numbers.\n");
+      printf("Error: - only operates on numbers.\n");
       exit(1);
     }
-    acc -= args->value.pair.car->value.number;
+    acc -= args->value.pair.car->value.number; // Accumulates the sub
     args = args->value.pair.cdr;
   }
+
   return make_number(acc);
 }
 
 
 // Scheme "+" procedure
 SchemeObject* primitive_add(SchemeObject* args) {
-  double acc = 0;
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: - requires at least one argument.\n");
+    exit(1);
+  }
 
-  while (args->type == SCHEME_PAIR) {
-      if (args->value.pair.car->type != SCHEME_NUMBER) {
-          printf("Error: + only adds numbers.\n");
-          exit(1);
-      }
-      acc += args->value.pair.car->value.number;
-      args = args->value.pair.cdr;
+  double acc = 0; // Accumulator
+
+  while (args != NULL && args->type == SCHEME_PAIR) {
+    if (args->value.pair.car->type != SCHEME_NUMBER) {
+      printf("Error: + only operates on numbers.\n");
+      exit(1);
+    }
+    acc += args->value.pair.car->value.number; // Accumulates the sum
+    args = args->value.pair.cdr;
   }
 
   return make_number(acc);
@@ -50,11 +73,3 @@ SchemeObject* (*get_primitive_function(const char* symbol))(SchemeObject* args) 
   return NULL;
 }
 
-// Checks if a string is actually a primitive
-int is_primitive(char str[10]) {
-  if(strcmp(str, "+") == 0 ||
-     strcmp(str, "-") == 0){
-      return 1;
-  }
-  return 0;
-}
