@@ -64,6 +64,7 @@ SchemeObject* parse_list(Token** tokens) {
   while (current_token->type != TOKEN_RIGHTPAREN && current_token->type != TOKEN_EOF) {
     SchemeObject* element = parser(tokens);
     SchemeObject* pair = make_pair(element, make_nil());
+
     tail->value.pair.cdr = pair;
     tail = pair;
     current_token = *tokens;
@@ -79,5 +80,6 @@ SchemeObject* parse_list(Token** tokens) {
 
   return head->value.pair.cdr;
 }
+
 
 
