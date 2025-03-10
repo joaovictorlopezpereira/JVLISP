@@ -3,8 +3,7 @@
 #include "types.h"
 #include "primitives.h"
 
-SchemeObject* eval(SchemeObject* expr, Environment* env);
-SchemeObject* apply(SchemeObject* func, SchemeObject* args);
+// SchemeObject* eval(SchemeObject* expr, Environment** env);
 
 // Looks up the value of a variable in the environment
 SchemeObject* lookup_variable(char* name, Environment* env) {
@@ -15,7 +14,7 @@ SchemeObject* lookup_variable(char* name, Environment* env) {
     env = env->next;
   }
   printf("Error: variable '%s' not found\n", name);
-  exit(1);
+  return NULL;
 }
 
 // Inserts a new frame to the environment
@@ -41,21 +40,21 @@ Environment* init_environment() {
 }
 
 // Extends the environment by associating parameters with arguments
-Environment* extend_environment(SchemeObject* params, SchemeObject* args, Environment* env) {
-  Environment* new_env = NULL;
+// Environment* extend_environment(SchemeObject* params, SchemeObject* args, Environment* env) {
+//   Environment* new_env = NULL;
 
-  while (params != NULL && args != NULL) {
-    // Assumes that params is a pair of symbols and args are evaluated
-    new_env = add_variable(new_env, params->value.pair.car->value.symbol, eval(args->value.pair.car, env));
-    params = params->value.pair.cdr;
-    args = args->value.pair.cdr;
-  }
+//   while (params != NULL && args != NULL) {
+//     // Assumes that params is a pair of symbols and args are evaluated
+//     new_env = add_variable(new_env, params->value.pair.car->value.symbol, eval(args->value.pair.car, env));
+//     params = params->value.pair.cdr;
+//     args = args->value.pair.cdr;
+//   }
 
-  new_env = add_variable(new_env, "env", make_symbol("env"));
-  new_env->next = env;
+//   new_env = add_variable(new_env, "env", make_symbol("env"));
+//   new_env->next = env;
 
-  return new_env;
-}
+//   return new_env;
+// }
 
 // Frees the memory allocated by the environment
 void free_environment(Environment* env) {
