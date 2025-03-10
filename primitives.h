@@ -107,12 +107,43 @@ SchemeObject* primitive_div(SchemeObject* args) {
   return make_number(acc);
 }
 
+// Scheme "=" procedure
+SchemeObject* primitive_equal_sign(SchemeObject* args) {
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: = requires at least one argument.\n");
+    exit(1);
+  }
+
+  if (args->value.pair.car->type != SCHEME_NUMBER) {
+    printf("Error: = only operates on numbers.\n");
+    exit(1);
+  }
+
+  double first = args->value.pair.car->value.number;
+  args = args->value.pair.cdr;
+
+  while (args != NULL && args->type == SCHEME_PAIR) {
+    if (args->value.pair.car->type != SCHEME_NUMBER) {
+      printf("Error: = only operates on numbers.\n");
+      exit(1);
+    }
+    if (args->value.pair.car->value.number != first) {
+      return make_boolean("#f");
+    }
+    args = args->value.pair.cdr;
+  }
+
+  return make_boolean("#t");
+}
+
+
 // Array of symbols and their respective functions
 PrimitiveMapping primitives[] = {
   {"+", primitive_add},
   {"-", primitive_sub},
   {"*", primitive_mul},
   {"/", primitive_div},
+  {"=", primitive_equal_sign}
 };
 
 // Gets a primitive function given its "name"
