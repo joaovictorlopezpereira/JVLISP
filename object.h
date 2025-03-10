@@ -111,7 +111,7 @@ void free_object(SchemeObject* object) {
 void print_scheme_object(SchemeObject* object) {
   switch (object->type) {
     case SCHEME_NUMBER:
-      printf("%f", object->value.number);
+      printf("%g", object->value.number);
       break;
 
     case SCHEME_SYMBOL:
