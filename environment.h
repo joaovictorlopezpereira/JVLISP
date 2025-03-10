@@ -34,6 +34,8 @@ Environment* init_environment() {
   // Adds the primitive functions to the environment
   env = add_variable(env, "+", make_primitive(primitive_add, "+"));
   env = add_variable(env, "-", make_primitive(primitive_sub, "-"));
+  env = add_variable(env, "*", make_primitive(primitive_mul, "*"));
+  env = add_variable(env, "/", make_primitive(primitive_div, "/"));
 
   return env;
 }

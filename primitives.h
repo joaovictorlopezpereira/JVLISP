@@ -4,8 +4,10 @@
 #include <stdio.h>
 
 // Functions Signatures
-SchemeObject* primitive_sub(SchemeObject* args);
 SchemeObject* primitive_add(SchemeObject* args);
+SchemeObject* primitive_sub(SchemeObject* args);
+SchemeObject* primitive_mul(SchemeObject* args);
+SchemeObject* primitive_div(SchemeObject* args);
 SchemeObject* (*get_primitive_function(const char* symbol))(SchemeObject* args);
 
 
@@ -36,11 +38,10 @@ SchemeObject* primitive_sub(SchemeObject* args) {
   return make_number(acc);
 }
 
-
 // Scheme "+" procedure
 SchemeObject* primitive_add(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: - requires at least one argument.\n");
+    printf("Error: + requires at least one argument.\n");
     exit(1);
   }
 
@@ -58,9 +59,60 @@ SchemeObject* primitive_add(SchemeObject* args) {
   return make_number(acc);
 }
 
+// Scheme "*" procedure
+SchemeObject* primitive_mul(SchemeObject* args) {
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: * requires at least one argument.\n");
+    exit(1);
+  }
+
+  double acc = 1; // Accumulator
+
+  while (args != NULL && args->type == SCHEME_PAIR) {
+    if (args->value.pair.car->type != SCHEME_NUMBER) {
+      printf("Error: * only operates on numbers.\n");
+      exit(1);
+    }
+    acc *= args->value.pair.car->value.number; // Accumulates the sum
+    args = args->value.pair.cdr;
+  }
+
+  return make_number(acc);
+}
+
+// Scheme "/" procedure
+SchemeObject* primitive_div(SchemeObject* args) {
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: / requires at least one argument.\n");
+    exit(1);
+  }
+
+  if (args->value.pair.car->type != SCHEME_NUMBER) {
+    printf("Error: / only operates on numbers.\n");
+    exit(1);
+  }
+
+  double acc = args->value.pair.car->value.number; // Accumulator
+  args = args->value.pair.cdr;
+
+  while (args != NULL && args->type == SCHEME_PAIR) {
+    if (args->value.pair.car->type != SCHEME_NUMBER) {
+      printf("Error: / only operates on numbers.\n");
+      exit(1);
+    }
+    acc /= args->value.pair.car->value.number; // Accumulates the sub
+    args = args->value.pair.cdr;
+  }
+
+  return make_number(acc);
+}
+
+// Array of symbols and their respective functions
 PrimitiveMapping primitives[] = {
   {"+", primitive_add},
   {"-", primitive_sub},
+  {"*", primitive_mul},
+  {"/", primitive_div},
 };
 
 // Gets a primitive function given its "name"

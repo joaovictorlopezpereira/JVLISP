@@ -3,6 +3,8 @@
 
 int main() {
   const char* input = "(define x 10)"; // not working
+  // const char* input = "(/ 5 2 2)"; // working
+  // const char* input = "(* 1 3 7)"; // working
   // const char* input = "(+ 5 (- 4 3) 1)"; //working
   // const char* input = "(- 5 2 1)"; // working
   // const char* input = "(+ 2 3 7)"; // working
