@@ -28,17 +28,29 @@ Token* tokenize(const char* input) {
       current++;
       continue;
     }
-    // If it is a (, the token is a Scheme (
+    // Scheme's (
     if (*current == '(') {
       tokens[token_count++] = (Token){TOKEN_LEFTPAREN, "("};
       current++;
     }
-    // If it is a ), the token is a Scheme )
+    // Scheme's)
     else if (*current == ')') {
       tokens[token_count++] = (Token){TOKEN_RIGHTPAREN, ")"};
       current++;
     }
-    // If it is a number, the token is a Scheme number
+    // Scheme's #t and #f
+    else if (*current == '#' && (current[1] == 't' || current[1] == 'f')) {
+      char* bool_str = (char*)malloc(3);
+      if (bool_str) {
+          bool_str[0] = current[0];
+          bool_str[1] = current[1];
+          bool_str[2] = '\0';
+      }
+      tokens[token_count++] = (Token){TOKEN_BOOLEAN, bool_str};
+      current += 2;
+  }
+
+    // Scheme's number
     else if (isdigit(*current)) {
       char* start = current;
       while (isdigit(*current)) {
