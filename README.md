@@ -8,21 +8,30 @@ A mini ``Scheme`` interpreter in ``C`` heavily inspired by the metacircular eval
 
 ## How to Compile
 
-There are 3 possible ways of compiling the code:
+There are 3 possible ways to compile the code:
 
-- The files can be downloaded and compiled by running ``Makefile`` in your terminal;
+1. **Using Makefile**:  
+   Simply run `make` in your terminal.
 
-- The files can be downloaded and compiled by running ``build.sh`` in your terminal;
+2. **Using build.sh**:  
+   Run the `build.sh` script in your terminal.
 
-- The files can be downloaded and compiled by running ``gcc -I./include -o jvlisp.exe src/*.c`` in your terminal.
+3. **Using GCC directly**:  
+   Run the following command in your terminal:  
+   ```bash
+   gcc -I./include -o jvlisp.exe src/*.c
+   ```
 
 -----
 
 ## How to Run
 
-The ``jvlisp.exe`` file can be downloaded and ran directly since it is available in the releases tab.
+The ``jvlisp.exe`` file can be downloaded and run directly from the releases tab.
 
-If you opted for compiling the files, then you can simply run it by running ``jvlisp.exe`` in your terminal.
+If you opted for compiling the files, you can run the compiled program with the following command:
+```bash
+./jvlisp.exe
+```
 
 -----
 
