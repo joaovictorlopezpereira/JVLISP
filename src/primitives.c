@@ -1,18 +1,6 @@
-#pragma once
-
 
 // Headers
-#include "object.h"
-#include <stdio.h>
-
-
-// Functions Signatures
-SchemeObject* primitive_add(SchemeObject* args);
-SchemeObject* primitive_sub(SchemeObject* args);
-SchemeObject* primitive_mul(SchemeObject* args);
-SchemeObject* primitive_div(SchemeObject* args);
-SchemeObject* (*get_primitive_function(const char* symbol))(SchemeObject* args);
-
+#include "primitives.h"
 
 // Scheme "+" procedure
 SchemeObject* primitive_add(SchemeObject* args) {
@@ -151,9 +139,13 @@ SchemeObject* primitive_cons(SchemeObject* args){
     exit(1);
   }
 
+  if (args->value.pair.cdr->value.pair.cdr->type == SCHEME_PAIR) {
+    printf("Error: cons does not require more than 2 arguments.\n");
+    exit(1);
+  }
+
   return make_pair(args->value.pair.car, args->value.pair.cdr->value.pair.car);
 }
-
 
 // Scheme "car" procedure
 SchemeObject* primitive_car(SchemeObject* args){

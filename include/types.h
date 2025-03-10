@@ -58,7 +58,7 @@ typedef enum {
   TOKEN_EOF,        // End of input
 } TokenType;
 
-// A Token has a TokenType and a Token
+// A Token has a TokenType and a value
 typedef struct {
   TokenType type;
   char* value;

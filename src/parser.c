@@ -1,17 +1,6 @@
-#pragma once
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
-#include "object.h"
-#include "tokenizer.h"
-#include "primitives.h"
-
-// Functions Signatures
-SchemeObject* parse_list(Token** tokens);
-SchemeObject* parser(Token** tokens);
-
+// Headers
+#include "../include/parser.h"
 
 // Parses a list of given tokens
 SchemeObject* parser(Token** tokens) {
