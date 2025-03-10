@@ -5,25 +5,13 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "object.h"
+#include "types.h"
 
-// A Token type is either (, ), a symbol, a number a EOF or invalid
-typedef enum {
-  TOKEN_LEFTPAREN,  // (
-  TOKEN_RIGHTPAREN,  // )
-  TOKEN_SYMBOL,  // Symbol name (e.g., "+", "x")
-  TOKEN_NUMBER,  // Number (e.g., "1", "42")
-  TOKEN_EOF,     // End of input
-} TokenType;
-
-// A Token has a TokenType and a Token
-typedef struct {
-  TokenType type;
-  char* value;
-} Token;
 
 // Functions Signatures
 Token* tokenize(const char* input);
 void free_tokens(Token* tokens);
+
 
 // Tokenizes the input
 Token* tokenize(const char* input) {
@@ -90,5 +78,4 @@ void free_tokens(Token* tokens) {
     free(tokens[i].value);
     i++;
   }
-  free(tokens);
 }
