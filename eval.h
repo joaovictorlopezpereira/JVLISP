@@ -4,12 +4,12 @@
 #include "environment.h"
 
 // Functions Signatures
-SchemeObject* eval(SchemeObject* expr, Environment* env);
+SchemeObject* eval(SchemeObject* expr, Environment** env);
 SchemeObject* apply(SchemeObject* func, SchemeObject* args);
-SchemeObject* map_eval(SchemeObject* args, Environment* env);
+SchemeObject* map_eval(SchemeObject* args, Environment** env);
 
-
-SchemeObject* eval(SchemeObject* expr, Environment* env) {
+// Evaluates a given expression in respect to an environment
+SchemeObject* eval(SchemeObject* expr, Environment** env) {
   switch (expr->type) {
     case SCHEME_NUMBER:
     case SCHEME_STRING:
@@ -17,13 +17,20 @@ SchemeObject* eval(SchemeObject* expr, Environment* env) {
     case SCHEME_NIL:
       return expr;
 
-    // Define must come before symbol!
-
     case SCHEME_SYMBOL:
     case SCHEME_PRIMITIVE:
-      return lookup_variable(expr->value.symbol, env);
+      return lookup_variable(expr->value.symbol, *env);
 
     case SCHEME_PAIR:
+      // Define
+      if (strcmp(expr->value.pair.car->value.symbol, "define") == 0){
+        SchemeObject* symbol = expr->value.pair.cdr->value.pair.car;
+        SchemeObject* value = eval(expr->value.pair.cdr->value.pair.cdr->value.pair.car, env);
+        *env = add_variable(*env, symbol->value.symbol, value);
+        printf("%s defined in the global environment\n", symbol->value.symbol);
+        return NULL;
+      }
+
       SchemeObject* first = eval(expr->value.pair.car, env);
 
       if (first->type == SCHEME_PRIMITIVE || first->type == SCHEME_LAMBDA) {
@@ -45,7 +52,7 @@ SchemeObject* eval(SchemeObject* expr, Environment* env) {
   }
 }
 
-
+// Applies a given function to a list of arguments
 SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
   if (func->type == SCHEME_PRIMITIVE) {
     SchemeObject* (*f)(SchemeObject* args) = get_primitive_function(func->value.symbol);
@@ -60,7 +67,8 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
   return NULL;
 }
 
-SchemeObject* map_eval(SchemeObject* args, Environment* env){
+// Maps eval to a list of arguments in respect to an environment
+SchemeObject* map_eval(SchemeObject* args, Environment** env){
   if (args == NULL || args->type == SCHEME_NIL) {
     return NULL;
   }
