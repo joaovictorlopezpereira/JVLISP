@@ -50,18 +50,30 @@ Environment* init_environment() {
   return env;
 }
 
-// Extends the environment by associating parameters with arguments
+// Extends the environment given a list of parameters, arguments and the environment
 Environment* extend_environment(SchemeObject* params, SchemeObject* args, Environment* env) {
-  Environment* new_env = NULL;
-
-  while (params != NULL && params->type != SCHEME_NIL && args != NULL && args->type != SCHEME_NIL) {
-    new_env = add_variable(new_env, params->value.pair.car->value.symbol, args->value.pair.car);
-    params = params->value.pair.cdr;
-    args = args->value.pair.cdr;
+  // If they are both NULL, return a error
+  if (params == NULL && args == NULL) {
+    printf("error: parameters and arguments are both NULL");
+    return NULL;
   }
 
-  new_env->next = env;
-  return new_env;
+  // If one is nil or null and the other isn't, return a error
+  if (((params->type == SCHEME_NIL && args->type != SCHEME_NIL) || (params->type != SCHEME_NIL && args->type == SCHEME_NIL)) || (params == NULL || args == NULL)){
+    printf("Error: Mismatch in parameter and argument lengths.\n");
+    return NULL;
+  }
+
+  // If they are both nil, the list of parameters and arguments is over
+  if (params->type == SCHEME_NIL && args->type == SCHEME_NIL){
+    return env;
+  }
+
+  // Add a relation between parameter and argument to the environment
+  Environment* new_env = add_variable(env, params->value.pair.car->value.symbol, args->value.pair.car);
+
+  // Recursively extend the environment to the remaining variables
+  return extend_environment(params->value.pair.cdr, args->value.pair.cdr, new_env);
 }
 
 // Frees the memory allocated by the environment
