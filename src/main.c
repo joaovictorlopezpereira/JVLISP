@@ -5,8 +5,7 @@
 
 // TODO: free tokens after parsing
 // TODO: remove exits and replace with NULL pointers
-// TODO: (define f (lambda (n) (if (= n 1) 1 (* n (f (- n 1)))))) not working
-// TODO: (define f (lambda (n) (if (= n 1) 1 (if (= n 2) 1 (+ (f (- n 1)) (f (- n 2))))))) not working
+// TODO: freeing the expr and the result make recursion not working. Why would free a SchemeObject make the environment stop working as it should? Maybe it has to do with the pointers. Maybe creating a copy of the expression in eval makes it possible for me to free it in main?
 
 int main() {
   char* input = malloc(256 * sizeof(char));
@@ -19,8 +18,8 @@ int main() {
     SchemeObject* result = eval(expr, &global_environment);
     print_scheme_object(result);
 
-    free_scheme_object(expr);
-    free_scheme_object(result);
+    // free_scheme_object(input);
+    // free_scheme_object(result);
   }
 
   free_environment(global_environment);
