@@ -52,10 +52,11 @@ typedef struct {
 // A Token type is either (, ), a symbol, a number a EOF or invalid
 typedef enum {
   TOKEN_LEFTPAREN,  // (
-  TOKEN_RIGHTPAREN,  // )
-  TOKEN_SYMBOL,  // Symbol name (e.g., "+", "x")
-  TOKEN_NUMBER,  // Number (e.g., "1", "42")
-  TOKEN_EOF,     // End of input
+  TOKEN_RIGHTPAREN, // )
+  TOKEN_BOOLEAN,    // #t #f
+  TOKEN_SYMBOL,     // Symbol name (e.g., "+", "x")
+  TOKEN_NUMBER,     // Number (e.g., "1", "42")
+  TOKEN_EOF,        // End of input
 } TokenType;
 
 // A Token has a TokenType and a Token
