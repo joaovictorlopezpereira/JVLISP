@@ -109,6 +109,9 @@ void free_object(SchemeObject* object) {
 
 // Prints the SchemeObject
 void print_scheme_object(SchemeObject* object) {
+  if (object == NULL){
+    return;
+  }
   switch (object->type) {
     case SCHEME_NUMBER:
       printf("%g", object->value.number);
