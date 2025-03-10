@@ -12,8 +12,10 @@
 SchemeObject* parse_list(Token** tokens);
 SchemeObject* parser(Token** tokens);
 
+
 // Parses a list of given tokens
 SchemeObject* parser(Token** tokens) {
+  Token** t = tokens;
   SchemeObject* expression;
   Token* current_token = *tokens;
 
@@ -25,7 +27,7 @@ SchemeObject* parser(Token** tokens) {
       break;
 
     case TOKEN_RIGHTPAREN:
-      printf("Error: there's a right parenthesis missing.\n");
+      printf("Error: there's a left parenthesis missing.\n");
       exit(1);
 
     case TOKEN_NUMBER:
