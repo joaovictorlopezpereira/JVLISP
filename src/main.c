@@ -5,6 +5,8 @@
 
 // TODO: free tokens after parsing
 // TODO: remove exits and replace with NULL pointers
+// TODO: (define f (lambda (n) (if (= n 1) 1 (* n (f (- n 1)))))) not working
+// TODO: (define f (lambda (n) (if (= n 1) 1 (if (= n 2) 1 (+ (f (- n 1)) (f (- n 2))))))) not working
 
 int main() {
   char* input = malloc(256 * sizeof(char));
