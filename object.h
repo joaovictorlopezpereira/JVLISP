@@ -14,6 +14,7 @@ SchemeObject* make_primitive(SchemeObject* (*func)(SchemeObject* args), const ch
 SchemeObject* make_lambda(SchemeObject* params, SchemeObject* body, Environment* env);
 SchemeObject* make_boolean(const char* string);
 SchemeObject* make_nil();
+void free_scheme_object(SchemeObject* object);
 void print_scheme_object(SchemeObject* object);
 
 // Creates a Scheme number
@@ -89,7 +90,10 @@ SchemeObject* make_nil() {
 }
 
 // Frees the memory allocated by the SchemeObject
-void free_object(SchemeObject* object) {
+void free_scheme_object(SchemeObject* object) {
+  if (object == NULL){
+    return;
+  }
   switch (object->type) {
     case SCHEME_SYMBOL:
       free(object->value.symbol);
@@ -98,18 +102,17 @@ void free_object(SchemeObject* object) {
       free(object->value.string);
       break;
     case SCHEME_PAIR:
-      free_object(object->value.pair.car);
-      free_object(object->value.pair.cdr);
+      free_scheme_object(object->value.pair.car);
+      free_scheme_object(object->value.pair.cdr);
       break;
     case SCHEME_LAMBDA:
-      free_object(object->value.lambda.body);
+      free_scheme_object(object->value.lambda.body);
       free(object->value.lambda.env);
-      free_object(object->value.lambda.params);
+      free_scheme_object(object->value.lambda.params);
       break;
-    default:
-      break;  // SCHEME_NUMBER, SCHEME_BOOLEAN, SCHEME_PRIMITIVE e SCHEME_NIL
+    default: // SCHEME_NUMBER, SCHEME_BOOLEAN, SCHEME_PRIMITIVE e SCHEME_NIL
+      break;  // These types do not allocate memory dynamically
   }
-  free(object);
 }
 
 // Prints the SchemeObject
