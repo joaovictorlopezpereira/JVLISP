@@ -139,6 +139,51 @@ SchemeObject* primitive_equal_sign(SchemeObject* args) {
   return make_boolean("#t");
 }
 
+// Scheme "cons" procedure
+SchemeObject* primitive_cons(SchemeObject* args){
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: cons requires at least 2 arguments.\n");
+    exit(1);
+  }
+
+  if (args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
+    printf("Error: cons requires a valid second argument.\n");
+    exit(1);
+  }
+
+  return make_pair(args->value.pair.car, args->value.pair.cdr->value.pair.car);
+}
+
+
+// Scheme "car" procedure
+SchemeObject* primitive_car(SchemeObject* args){
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: car requires at least 1 arguments.\n");
+    exit(1);
+  }
+
+  if (args->value.pair.car->type != SCHEME_PAIR){
+    printf("Error: car only operates on pairs");
+    exit(1);
+  }
+
+  return args->value.pair.car->value.pair.car;
+}
+
+// Scheme "cdr" procedure
+SchemeObject* primitive_cdr(SchemeObject* args){
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: cdr requires at least 1 arguments.\n");
+    exit(1);
+  }
+
+  if (args->value.pair.car->type != SCHEME_PAIR){
+    printf("Error: cdr only operates on pairs");
+    exit(1);
+  }
+
+  return args->value.pair.car->value.pair.cdr;
+}
 
 // Array of symbols and their respective functions
 PrimitiveMapping primitives[] = {
@@ -146,7 +191,10 @@ PrimitiveMapping primitives[] = {
   {"-", primitive_sub},
   {"*", primitive_mul},
   {"/", primitive_div},
-  {"=", primitive_equal_sign}
+  {"=", primitive_equal_sign},
+  {"cons", primitive_cons},
+  {"car", primitive_car},
+  {"cdr", primitive_cdr}
 };
 
 // Gets a primitive function given its "name"

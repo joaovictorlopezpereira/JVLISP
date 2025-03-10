@@ -46,6 +46,9 @@ Environment* init_environment() {
   env = add_variable(env, "*", make_primitive(primitive_mul, "*"));
   env = add_variable(env, "/", make_primitive(primitive_div, "/"));
   env = add_variable(env, "=", make_primitive(primitive_equal_sign, "="));
+  env = add_variable(env, "cons", make_primitive(primitive_cons, "cons"));
+  env = add_variable(env, "car", make_primitive(primitive_car, "car"));
+  env = add_variable(env, "cdr", make_primitive(primitive_cdr, "cdr"));
 
   return env;
 }

@@ -111,7 +111,7 @@ void free_scheme_object(SchemeObject* object) {
       free_scheme_object(object->value.lambda.params);
       break;
     default: // SCHEME_NUMBER, SCHEME_BOOLEAN, SCHEME_PRIMITIVE e SCHEME_NIL
-      break;  // These types do not allocate memory dynamically
+      break;  // These types do not allocate memory dynamically, so nothing to free
   }
 }
 
