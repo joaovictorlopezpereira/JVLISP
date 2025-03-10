@@ -1,4 +1,3 @@
-
 #pragma once
 
 // A Scheme type is either a number, a symbol, a string, a pair, a primitive, a lambda, a boolean or a nil.

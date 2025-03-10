@@ -1,7 +1,10 @@
 #pragma once
 
+
+// Headers
 #include "object.h"
 #include "environment.h"
+
 
 // Functions Signatures
 SchemeObject* eval(SchemeObject* expr, Environment** env);
@@ -79,17 +82,21 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
 
 // Applies a given function to a list of arguments
 SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
+  // if it's a primitive, then simply apply the function to the arguments
   if (func->type == SCHEME_PRIMITIVE) {
     SchemeObject* (*f)(SchemeObject* args) = get_primitive_function(func->value.symbol);
     return f(args);
   }
 
-  if (func->type == SCHEME_LAMBDA) {
+  // if it's a lambda, extend the environment and then apply the function to the respect in respect to the new environment
+  else if (func->type == SCHEME_LAMBDA) {
     Environment* new_env = extend_environment(func->value.lambda.params, args, func->value.lambda.env);
     return eval(func->value.lambda.body->value.pair.car, &new_env);
   }
 
-  printf("Error: Apply unknown case.");
+  else {
+    printf("Error: Apply unknown case.");
+  }
   return NULL;
 }
 
