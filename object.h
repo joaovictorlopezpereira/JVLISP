@@ -12,7 +12,7 @@ SchemeObject* make_string(const char* string);
 SchemeObject* make_pair(SchemeObject* car, SchemeObject* cdr);
 SchemeObject* make_primitive(SchemeObject* (*func)(SchemeObject* args), const char* string);
 SchemeObject* make_lambda(SchemeObject* params, SchemeObject* body, Environment* env);
-SchemeObject* make_boolean(int value);
+SchemeObject* make_boolean(const char* string);
 SchemeObject* make_nil();
 void print_scheme_object(SchemeObject* object);
 
@@ -69,10 +69,15 @@ SchemeObject* make_lambda(SchemeObject* params, SchemeObject* body, Environment*
 }
 
 // Creates a Scheme boolean
-SchemeObject* make_boolean(int value) {
+SchemeObject* make_boolean(const char * string) {
   SchemeObject* object = (SchemeObject*)malloc(sizeof(SchemeObject));
   object->type = SCHEME_BOOLEAN;
-  object->value.boolean = (value != 0);  // Makes every number be false except for 0
+  if (strcmp(string, "#t") == 0) {
+    object->value.boolean = 1;
+  }
+  else {
+    object->value.boolean = 0;
+  }
   return object;
 }
 
@@ -150,7 +155,7 @@ void print_scheme_object(SchemeObject* object) {
       break;
 
     case SCHEME_BOOLEAN:
-      printf(object->value.boolean ? "#t" : "#f");
+      printf(object->value.boolean == 1 ? "#t" : "#f");
       break;
 
     case SCHEME_NIL:
