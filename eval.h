@@ -10,6 +10,11 @@ SchemeObject* map_eval(SchemeObject* args, Environment** env);
 
 // Evaluates a given expression in respect to an environment
 SchemeObject* eval(SchemeObject* expr, Environment** env) {
+
+  if (expr == NULL) { // in case the parser launches a error that is passed to eval
+    return NULL;
+  }
+
   switch (expr->type) {
     case SCHEME_NUMBER:
     case SCHEME_STRING:
@@ -22,28 +27,48 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
       return lookup_variable(expr->value.symbol, *env);
 
     case SCHEME_PAIR:
-      // Define
+
+      // quote
+      if (strcmp(expr->value.pair.car->value.symbol, "quote") == 0){
+        return expr->value.pair.cdr;
+      }
+
+      // define
       if (strcmp(expr->value.pair.car->value.symbol, "define") == 0){
         SchemeObject* symbol = expr->value.pair.cdr->value.pair.car;
         SchemeObject* value = eval(expr->value.pair.cdr->value.pair.cdr->value.pair.car, env);
+        if (value->type == SCHEME_LAMBDA) {
+          value->value.lambda.env = add_variable(value->value.lambda.env, symbol->value.symbol, value);
+        }
         *env = add_variable(*env, symbol->value.symbol, value);
-        printf("%s defined in the global environment\n", symbol->value.symbol);
+        printf("%s defined in the global environment", symbol->value.symbol);
         return NULL;
       }
 
-      SchemeObject* first = eval(expr->value.pair.car, env);
+      // lambda
+      if (strcmp(expr->value.pair.car->value.symbol, "lambda") == 0){
+        SchemeObject* params = expr->value.pair.cdr->value.pair.car;
+        SchemeObject* body = expr->value.pair.cdr->value.pair.cdr;
+        return make_lambda(params, body, *env);
+      }
 
+      // if
+      if (strcmp(expr->value.pair.car->value.symbol, "if") == 0) {
+        SchemeObject* condition = eval(expr->value.pair.cdr->value.pair.car, env);
+        if (condition->type == SCHEME_BOOLEAN && condition->value.boolean == 1) {
+          return eval(expr->value.pair.cdr->value.pair.cdr->value.pair.car, env);
+        }
+        else {
+          return eval(expr->value.pair.cdr->value.pair.cdr->value.pair.cdr->value.pair.car, env);
+        }
+      }
+
+      // Primitive or Lambda
+      SchemeObject* first = eval(expr->value.pair.car, env);
       if (first->type == SCHEME_PRIMITIVE || first->type == SCHEME_LAMBDA) {
         SchemeObject* args = map_eval(expr->value.pair.cdr, env);
         return apply(first, args);
       }
-
-      // if (first->type == SCHEME_SYMBOL && strcmp(first->value.symbol, "define") == 0) {
-      //   SchemeObject* symbol = expr->value.pair.cdr->value.pair.car;
-      //   SchemeObject* value = eval(expr->value.pair.cdr->value.pair.cdr->value.pair.car, env);
-      //   env = add_variable(env, symbol->value.symbol, value);
-      //   return value;
-      // }
 
       return NULL;
 
@@ -59,18 +84,19 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
     return f(args);
   }
 
-  // if (func->type == SCHEME_LAMBDA) {
-  //   Environment* new_env = extend_environment(func->value.lambda.params, args, func->value.lambda.env);
-  //   return eval(func->value.lambda.body, new_env);
-  // }
+  if (func->type == SCHEME_LAMBDA) {
+    Environment* new_env = extend_environment(func->value.lambda.params, args, func->value.lambda.env);
+    return eval(func->value.lambda.body->value.pair.car, &new_env);
+  }
 
+  printf("Error: Apply unknown case.");
   return NULL;
 }
 
 // Maps eval to a list of arguments in respect to an environment
 SchemeObject* map_eval(SchemeObject* args, Environment** env){
   if (args == NULL || args->type == SCHEME_NIL) {
-    return NULL;
+    return make_nil();
   }
   return make_pair(eval(args->value.pair.car, env), map_eval(args->value.pair.cdr, env));
 }
