@@ -22,7 +22,7 @@ Token* tokenize(const char* input) {
       tokens[token_count++] = (Token){TOKEN_LEFTPAREN, "("};
       current++;
     }
-    // Scheme's)
+    // Scheme's )
     else if (*current == ')') {
       tokens[token_count++] = (Token){TOKEN_RIGHTPAREN, ")"};
       current++;
