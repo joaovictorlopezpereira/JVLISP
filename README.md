@@ -8,16 +8,13 @@ A mini ``Scheme`` interpreter in ``C`` heavily inspired by the metacircular eval
 
 ## How to Compile
 
-There are 3 possible ways to compile the code:
+There are 2 possible ways to compile the code:
 
-1. **Using Makefile**:  
-   Simply run `make` in your terminal.
-
-2. **Using build.sh**:  
+1. **Using build.sh**:
    Run the `build.sh` script in your terminal.
 
-3. **Using GCC directly**:  
-   Run the following command in your terminal:  
+2. **Using GCC directly**:
+   Run the following command in your terminal:
    ```bash
    gcc -I./include -o jvlisp.exe src/*.c
    ```
@@ -39,8 +36,9 @@ If you opted for compiling the files, you can run the compiled program with the 
 
 By now, the interpreter is still in development. However, a few special forms and primitives are available:
 
-- Special forms: ``define``, ``lambda``and ``if``;
+- Special forms: ``define``, ``lambda``, ``if`` and ``quote``;
 - Primitives: ``+``, ``-``, ``*``, ``/``, ``=``, ``cons``, ``car`` and ``cdr``.
+- Other features:  ``nil`` or ``'()``, recursion and dynamic scope.
 
 -----
 
