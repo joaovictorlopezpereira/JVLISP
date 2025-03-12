@@ -1,6 +1,15 @@
 
-// Headers
-#include "environment.h"
+// Includes
+#include "primitives.c"
+
+
+// Functions Signatures
+SchemeObject* lookup_variable(char* name, Environment* env);
+Environment* add_variable(Environment* env, char* name, SchemeObject* value);
+Environment* init_environment();
+Environment* extend_environment(SchemeObject* params, SchemeObject* args, Environment* env);
+void free_environment(Environment* env);
+
 
 // Looks up the value of a variable in the environment
 SchemeObject* lookup_variable(char* name, Environment* env) {

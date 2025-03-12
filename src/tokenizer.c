@@ -1,6 +1,17 @@
 
-// Headers
-#include "tokenizer.h"
+// Includes
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
+#include "object.c"
+#include "types.h"
+
+
+// Functions Signatures
+Token* tokenize(const char* input);
+void free_tokens(Token* tokens);
+
 
 // Tokenizes the input
 Token* tokenize(const char* input) {
@@ -9,7 +20,7 @@ Token* tokenize(const char* input) {
 
   // Allocs a copy of the input
   char* str = strdup(input);
-  char* current = str;
+  char* current = strdup(input);
 
   while (*current != '\0') {
     // Ignores whitespaces
@@ -37,7 +48,19 @@ Token* tokenize(const char* input) {
       }
       tokens[token_count++] = (Token){TOKEN_BOOLEAN, bool_str};
       current += 2;
-  }
+    }
+    // Scheme's nil
+    else if ((*current == 'n' && current[1] == 'i' && current[2] == 'l') || (*current == '\'' && current[1] == '(' && current[2] == ')')) {
+      char* bool_str = (char*)malloc(4);
+      if (bool_str) {
+          bool_str[0] = current[0];
+          bool_str[1] = current[1];
+          bool_str[2] = current[2];
+          bool_str[3] = '\0';
+      }
+      tokens[token_count++] = (Token){TOKEN_NIL, bool_str};
+      current += 3;
+    }
 
     // Scheme's number
     else if (isdigit(*current)) {

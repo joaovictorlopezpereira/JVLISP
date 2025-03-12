@@ -1,6 +1,13 @@
 
-// Headers
-#include "eval.h"
+// Includes
+#include "environment.c"
+
+
+// Functions Signatures
+SchemeObject* eval(SchemeObject* expr, Environment** env);
+SchemeObject* apply(SchemeObject* func, SchemeObject* args);
+SchemeObject* map_eval(SchemeObject* args, Environment** env);
+
 
 // Evaluates a given expression in respect to an environment
 SchemeObject* eval(SchemeObject* expr, Environment** env) {

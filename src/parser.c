@@ -1,6 +1,17 @@
 
-// Headers
-#include "../include/parser.h"
+// Includes
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
+#include "primitives.c"
+#include "tokenizer.c"
+
+
+// Functions Signatures
+SchemeObject* parse_list(Token** tokens);
+SchemeObject* parser(Token** tokens);
+
 
 // Parses a list of given tokens
 SchemeObject* parser(Token** tokens) {
@@ -24,6 +35,10 @@ SchemeObject* parser(Token** tokens) {
 
     case TOKEN_NUMBER:
       expression = make_number(strtod(current_token->value, NULL));
+      break;
+
+    case TOKEN_NIL:
+      expression = make_nil();
       break;
 
     case TOKEN_SYMBOL:
