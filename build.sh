@@ -2,12 +2,7 @@
 
 # Variables
 SRC_DIR="src"
-OUTPUT_FILE="jvlisp.exe"
+OUTPUT_FILE="jvlisp.out"
 
-gcc $SRC_DIR/main.c -o $OUTPUT_FILE
+gcc $SRC_DIR/main.c -o $OUTPUT_FILE -Wall
 
-# if [ $? -eq 0 ]; then
-#   echo "Compilation successful!"
-# else
-#   echo "Compilation error!"
-# fi
