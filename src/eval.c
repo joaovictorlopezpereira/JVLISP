@@ -34,16 +34,20 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
     case SCHEME_PAIR:
 
       // quote
-      if (strcmp(expr->value.pair.car->value.symbol, "quote") == 0){
+      if (strcmp(expr->value.pair.car->value.symbol, "quote") == 0) {
         return expr->value.pair.cdr;
       }
 
       // define
-      if (strcmp(expr->value.pair.car->value.symbol, "define") == 0){
+      if (strcmp(expr->value.pair.car->value.symbol, "define") == 0) {
         SchemeObject* symbol = expr->value.pair.cdr->value.pair.car;
         SchemeObject* value = eval(expr->value.pair.cdr->value.pair.cdr->value.pair.car, env);
         if (value->type == SCHEME_LAMBDA) {
           value->value.lambda.env = add_variable(value->value.lambda.env, symbol->value.symbol, value);
+        }
+        if (lookup_variable(symbol->value.symbol, *env) != NULL) {
+          printf("Error: variable '%s' already defined", symbol->value.symbol);
+          return NULL;
         }
         *env = add_variable(*env, symbol->value.symbol, value);
         printf("%s defined in the global environment", symbol->value.symbol);
@@ -51,7 +55,7 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
       }
 
       // lambda
-      if (strcmp(expr->value.pair.car->value.symbol, "lambda") == 0){
+      if (strcmp(expr->value.pair.car->value.symbol, "lambda") == 0) {
         SchemeObject* params = expr->value.pair.cdr->value.pair.car;
         SchemeObject* body = expr->value.pair.cdr->value.pair.cdr;
         return make_lambda(params, body, *env);
