@@ -25,7 +25,11 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
 
     case SCHEME_SYMBOL:
     case SCHEME_PRIMITIVE:
-      return lookup_variable(expr->value.symbol, *env);
+      SchemeObject* value = lookup_variable(expr->value.symbol, *env);
+      if (value == NULL) {
+        printf("Error: variable '%s' not found\n", expr->value.symbol);
+      }
+      return value;
 
     case SCHEME_PAIR:
 

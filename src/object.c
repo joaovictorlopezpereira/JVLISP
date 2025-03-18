@@ -133,7 +133,8 @@ void print_scheme_object(SchemeObject* object) {
       break;
 
     case SCHEME_STRING:
-      printf("\"%s\"", object->value.string);
+      // printf("\"%s\"", object->value.string);
+      printf("%s", object->value.string);
       break;
 
     case SCHEME_PAIR:

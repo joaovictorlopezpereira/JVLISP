@@ -192,6 +192,23 @@ SchemeObject* primitive_cdr(SchemeObject* args){
   return args->value.pair.car->value.pair.cdr;
 }
 
+// Scheme "print" procedure
+SchemeObject* primitive_print(SchemeObject* args) {
+  while (args != NULL && args->type == SCHEME_PAIR) {
+    // If it's a string, just print it without the parenthesis
+    if (args->value.pair.car->type == SCHEME_STRING){
+      printf("%s", args->value.pair.car->value.string);
+    }
+    else {
+      print_scheme_object(args->value.pair.car);
+    }
+    printf(" ");
+    args = args->value.pair.cdr;
+  }
+  printf("\n");
+  return NULL;
+}
+
 // Array of symbols and their respective functions
 PrimitiveMapping primitives[] = {
   {"+", primitive_add},
@@ -201,7 +218,8 @@ PrimitiveMapping primitives[] = {
   {"=", primitive_equal_sign},
   {"cons", primitive_cons},
   {"car", primitive_car},
-  {"cdr", primitive_cdr}
+  {"cdr", primitive_cdr},
+  {"print", primitive_print},
 };
 
 // Gets a primitive function given its "name"

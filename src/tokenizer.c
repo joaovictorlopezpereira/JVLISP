@@ -74,6 +74,23 @@ Token* tokenize(const char* input) {
       num_str[len] = '\0';
       tokens[token_count++] = (Token){TOKEN_NUMBER, num_str};
     }
+    // Scheme's string
+    else if (*current == '"') {
+      current++; // Skip opening quote
+      char* start = current;
+      while (*current != '\0' && *current != '"') {
+        current++;
+      }
+      int len = current - start;
+      char* str_val = (char*)malloc(len + 1);
+      strncpy(str_val, start, len);
+      str_val[len] = '\0';
+      tokens[token_count++] = (Token){TOKEN_STRING, str_val};
+      if (*current == '"') {
+        current++; // Skip closing quote
+      }
+    }
+
     // Else, the token is a Scheme symbol
     else {
       char* start = current;

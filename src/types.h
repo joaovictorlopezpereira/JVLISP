@@ -55,6 +55,7 @@ typedef enum {
   TOKEN_BOOLEAN,    // #t #f
   TOKEN_SYMBOL,     // Symbol name (e.g., "+", "x")
   TOKEN_NUMBER,     // Number (e.g., "1", "42")
+  TOKEN_STRING,     // "hello", "world"
   TOKEN_NIL,        // '() nil
   TOKEN_EOF,        // End of input
 } TokenType;

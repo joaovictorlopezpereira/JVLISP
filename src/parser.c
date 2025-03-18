@@ -49,6 +49,10 @@ SchemeObject* parser(Token** tokens) {
       expression = make_nil();
       break;
 
+    case TOKEN_STRING:
+      expression = make_string(current_token->value);
+      break;
+
     default:
       printf("Error: Unexpected token.\n");
       exit(1);
