@@ -59,13 +59,13 @@ Environment* extend_environment(SchemeObject* params, SchemeObject* args, Enviro
   }
 
   // If one is nil or null and the other isn't, return a error
-  if (((params->type == SCHEME_NIL && args->type != SCHEME_NIL) || (params->type != SCHEME_NIL && args->type == SCHEME_NIL)) || (params == NULL || args == NULL)){
+  if (((params->type == SCHEME_NIL && args->type != SCHEME_NIL) || (params->type != SCHEME_NIL && args->type == SCHEME_NIL)) || (params == NULL || args == NULL)) {
     printf("Error: Mismatch in parameter and argument lengths.\n");
     return NULL;
   }
 
   // If they are both nil, the list of parameters and arguments is over
-  if (params->type == SCHEME_NIL && args->type == SCHEME_NIL){
+  if (params->type == SCHEME_NIL && args->type == SCHEME_NIL) {
     return env;
   }
 

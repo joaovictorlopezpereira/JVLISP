@@ -107,7 +107,7 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
 }
 
 // Maps eval to a list of arguments in respect to an environment
-SchemeObject* map_eval(SchemeObject* args, Environment** env){
+SchemeObject* map_eval(SchemeObject* args, Environment** env) {
   if (args == NULL || args->type == SCHEME_NIL) {
     return make_nil();
   }

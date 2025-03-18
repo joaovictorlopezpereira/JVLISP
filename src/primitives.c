@@ -143,7 +143,7 @@ SchemeObject* primitive_equal_sign(SchemeObject* args) {
 }
 
 // Scheme "cons" procedure
-SchemeObject* primitive_cons(SchemeObject* args){
+SchemeObject* primitive_cons(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
     printf("Error: cons requires at least 2 arguments.\n");
     exit(1);
@@ -163,13 +163,13 @@ SchemeObject* primitive_cons(SchemeObject* args){
 }
 
 // Scheme "car" procedure
-SchemeObject* primitive_car(SchemeObject* args){
+SchemeObject* primitive_car(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
     printf("Error: car requires at least 1 arguments.\n");
     exit(1);
   }
 
-  if (args->value.pair.car->type != SCHEME_PAIR){
+  if (args->value.pair.car->type != SCHEME_PAIR) {
     printf("Error: car only operates on pairs");
     exit(1);
   }
@@ -178,13 +178,13 @@ SchemeObject* primitive_car(SchemeObject* args){
 }
 
 // Scheme "cdr" procedure
-SchemeObject* primitive_cdr(SchemeObject* args){
+SchemeObject* primitive_cdr(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
     printf("Error: cdr requires at least 1 arguments.\n");
     exit(1);
   }
 
-  if (args->value.pair.car->type != SCHEME_PAIR){
+  if (args->value.pair.car->type != SCHEME_PAIR) {
     printf("Error: cdr only operates on pairs");
     exit(1);
   }
@@ -196,7 +196,7 @@ SchemeObject* primitive_cdr(SchemeObject* args){
 SchemeObject* primitive_print(SchemeObject* args) {
   while (args != NULL && args->type == SCHEME_PAIR) {
     // If it's a string, just print it without the parenthesis
-    if (args->value.pair.car->type == SCHEME_STRING){
+    if (args->value.pair.car->type == SCHEME_STRING) {
       printf("%s", args->value.pair.car->value.string);
     }
     else {
