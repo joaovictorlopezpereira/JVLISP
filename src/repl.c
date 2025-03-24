@@ -37,9 +37,7 @@ void REPL() {
   }
 
   // Frees some allocated memory
-  printf("test\n");
   free_tokens(original_tokens);
-  printf("test\n");
   free(input);
   free_environment(global_environment);
 

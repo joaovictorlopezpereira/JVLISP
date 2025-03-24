@@ -11,7 +11,6 @@
 // Functions Signatures
 Token* tokenize(const char* input);
 void free_tokens(Token* tokens);
-void print_tokens(Token* tokens);
 
 
 // Tokenizes the input
@@ -124,7 +123,6 @@ Token* tokenize(const char* input) {
 
 // Frees memory allocated to tokens
 void free_tokens(Token* tokens) {
-  print_tokens(tokens);
   if (!tokens) return;
   for (int i = 0; tokens[i].type != TOKEN_EOF; i++) {
     if (tokens[i].value) {
@@ -134,16 +132,3 @@ void free_tokens(Token* tokens) {
   free(tokens);
 }
 
-void print_tokens(Token* tokens) {
-  if (!tokens) {
-    printf("Nenhum token para imprimir.\n");
-    return;
-  }
-
-  int i = 0;
-  while (tokens[i].type != TOKEN_EOF) {
-    printf("Token %d: Tipo = %d, Valor = %s\n", i, tokens[i].type, tokens[i].value ? tokens[i].value : "NULL");
-    i++;
-  }
-  printf("Token %d: Tipo = TOKEN_EOF\n", i);
-}
