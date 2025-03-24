@@ -67,10 +67,10 @@ Token* tokenize(const char* input) {
     // Scheme's number
     else if (isdigit(*current) || (*current == '-' && isdigit(current[1]))) {
       const char* start = current;
-      if (*current == '-') current++; // Suporte a números negativos
+      if (*current == '-') current++; // Negative numbers
 
       while (isdigit(*current)) current++;
-      if (*current == '.') { // Suporte a decimais
+      if (*current == '.') { // Decimal numbers
         current++;
         while (isdigit(*current)) current++;
       }
@@ -97,8 +97,9 @@ Token* tokenize(const char* input) {
         str_val[current - start] = '\0';
         tokens[token_count++] = (Token){TOKEN_STRING, str_val};
         current++; // Skip closing quote
-      } else {
-        printf("Erro: String não fechada corretamente!\n");
+      } 
+      else {
+        printf("Error: string not closed.\n");
       }
     }
 
