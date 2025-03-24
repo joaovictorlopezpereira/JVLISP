@@ -52,15 +52,21 @@ Environment* init_environment() {
 
 // Extends the environment given a list of parameters, arguments and the environment
 Environment* extend_environment(SchemeObject* params, SchemeObject* args, Environment* env) {
-  // If they are both NULL, returns a error
-  if (params == NULL && args == NULL) {
-    printf("Error: parameters and arguments are both NULL.");
+
+  // If they are both NULL or NIL, returns the current environment
+  if ((params == NULL || params->type == SCHEME_NIL) && (args == NULL || args->type == SCHEME_NIL)) {
+    return env;
+  }
+
+  // If the function expects 0 arguments and it got more than 0, returns a error
+  if (params->type == SCHEME_NIL && args->type != SCHEME_NIL) {
+    printf("Error: function expects 0 arguments but got at least 1.");
     return NULL;
   }
 
   // If one is nil or null and the other isn't, returns a error
   if (((params->type == SCHEME_NIL && args->type != SCHEME_NIL) || (params->type != SCHEME_NIL && args->type == SCHEME_NIL)) || (params == NULL || args == NULL)) {
-    printf("Error: Mismatch in parameter and argument lengths.");
+    printf("Error: mismatch in parameter and argument lengths.");
     return NULL;
   }
 

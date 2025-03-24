@@ -15,12 +15,11 @@ void free_tokens(Token* tokens);
 
 // Tokenizes the input
 Token* tokenize(const char* input) {
-  Token* tokens = (Token*)malloc(sizeof(Token) * 100); // 100 tokens por input
-  int token_count = 0;
+  int capacity = 100;
+  Token* tokens = (Token*)malloc(sizeof(Token) * capacity);
 
-  // Allocs a copy of the input
-  char* str = strdup(input);
-  char* current = strdup(input);
+  int token_count = 0;
+  const char* current = input;
 
   while (*current != '\0') {
     // Ignores whitespaces
@@ -29,15 +28,21 @@ Token* tokenize(const char* input) {
       continue;
     }
 
+    // Enlarges the tokens if necessary
+    if (token_count >= capacity - 1) {
+      capacity *= 2;
+      tokens = (Token*)realloc(tokens, sizeof(Token) * capacity);
+    }
+
     // Scheme's (
     if (*current == '(') {
-      tokens[token_count++] = (Token){TOKEN_LEFTPAREN, "("};
+      tokens[token_count++] = (Token){TOKEN_LEFTPAREN, _strdup("(")};
       current++;
     }
 
     // Scheme's )
     else if (*current == ')') {
-      tokens[token_count++] = (Token){TOKEN_RIGHTPAREN, ")"};
+      tokens[token_count++] = (Token){TOKEN_RIGHTPAREN, _strdup(")")};
       current++;
     }
 
@@ -54,74 +59,72 @@ Token* tokenize(const char* input) {
     }
 
     // Scheme's nil
-    else if ((*current == 'n' && current[1] == 'i' && current[2] == 'l') || (*current == '\'' && current[1] == '(' && current[2] == ')')) {
-      char* bool_str = (char*)malloc(4);
-      if (bool_str) {
-          bool_str[0] = current[0];
-          bool_str[1] = current[1];
-          bool_str[2] = current[2];
-          bool_str[3] = '\0';
-      }
-      tokens[token_count++] = (Token){TOKEN_NIL, bool_str};
+    else if (strncmp(current, "'()", 3) == 0) {
+      tokens[token_count++] = (Token){TOKEN_NIL, _strdup("'()")};
       current += 3;
     }
 
     // Scheme's number
-    else if (isdigit(*current)) {
-      char* start = current;
-      while (isdigit(*current)) {
+    else if (isdigit(*current) || (*current == '-' && isdigit(current[1]))) {
+      const char* start = current;
+      if (*current == '-') current++; // Suporte a números negativos
+
+      while (isdigit(*current)) current++;
+      if (*current == '.') { // Suporte a decimais
         current++;
+        while (isdigit(*current)) current++;
       }
-      int len = current - start;
-      char* num_str = (char*)malloc(len + 1);
-      strncpy(num_str, start, len);
-      num_str[len] = '\0';
+
+      char* num_str = (char*)malloc(current - start + 1);
+      memcpy(num_str, start, current - start);
+      num_str[current - start] = '\0';
       tokens[token_count++] = (Token){TOKEN_NUMBER, num_str};
     }
 
     // Scheme's string
     else if (*current == '"') {
       current++; // Skip opening quote
-      char* start = current;
+      const char* start = current;
+
       while (*current != '\0' && *current != '"') {
+        if (*current == '\\' && (current[1] == '"' || current[1] == '\\')) current++; // Suporte a escapes
         current++;
       }
-      int len = current - start;
-      char* str_val = (char*)malloc(len + 1);
-      strncpy(str_val, start, len);
-      str_val[len] = '\0';
-      tokens[token_count++] = (Token){TOKEN_STRING, str_val};
+
       if (*current == '"') {
+        char* str_val = (char*)malloc(current - start + 1);
+        memcpy(str_val, start, current - start);
+        str_val[current - start] = '\0';
+        tokens[token_count++] = (Token){TOKEN_STRING, str_val};
         current++; // Skip closing quote
+      } else {
+        printf("Erro: String não fechada corretamente!\n");
       }
     }
 
     // Else, the token is a Scheme symbol
     else {
-      char* start = current;
+      const char* start = current;
       while (!isspace(*current) && *current != '(' && *current != ')' && *current != '\0') {
         current++;
       }
-      int len = current - start;
-      char* symbol_str = (char*)malloc(len + 1);
-      strncpy(symbol_str, start, len);
-      symbol_str[len] = '\0';
+      char* symbol_str = (char*)malloc(current - start + 1);
+      memcpy(symbol_str, start, current - start);
+      symbol_str[current - start] = '\0';
       tokens[token_count++] = (Token){TOKEN_SYMBOL, symbol_str};
     }
   }
 
   // Adds the EOF token at the end
   tokens[token_count++] = (Token){TOKEN_EOF, NULL};
-
-  free(str); // Frees the temporary string allocated by strdup
   return tokens;
 }
 
 // Frees memory allocated to tokens
 void free_tokens(Token* tokens) {
-  int i = 0;
-  while (tokens[i].type != TOKEN_EOF) {
+  if (!tokens) return;
+  for (int i = 0; tokens[i].type != TOKEN_EOF; i++) {
     free(tokens[i].value);
-    i++;
   }
+  free(tokens);
 }

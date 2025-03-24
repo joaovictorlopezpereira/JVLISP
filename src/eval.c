@@ -101,23 +101,49 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
 
 // Applies a given function to a list of arguments
 SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
-  // if it's a primitive, then simply applies the function to the arguments
+  // If it's a primitive function, apply it directly
   if (func->type == SCHEME_PRIMITIVE) {
     SchemeObject* (*f)(SchemeObject* args) = get_primitive_function(func->value.symbol);
     return f(args);
   }
 
-  // if it's a lambda, extends the environment and then apply the function to the respect in respect to the new environment
+  // If it's a lambda function, check arity and extend the environment before applying
   else if (func->type == SCHEME_LAMBDA) {
+
+    // Counts the number of expected parameters
+    int expected_args = 0;
+    SchemeObject* param_list = func->value.lambda.params;
+    while (param_list != NULL && param_list->type != SCHEME_NIL) {
+      expected_args++;
+      param_list = param_list->value.pair.cdr;
+    }
+
+    // Counts the number of provided arguments
+    int given_args = 0;
+    SchemeObject* arg_list = args;
+    while (arg_list != NULL && arg_list->type != SCHEME_NIL) {
+      given_args++;
+      arg_list = arg_list->value.pair.cdr;
+    }
+
+    // Checks if the number of arguments matches the expected number
+    if (given_args != expected_args) {
+      printf("Error: Function expected %d arguments but got %d.", expected_args, given_args);
+      return NULL;
+    }
+
+    // Extends the environment and evaluates the function
     Environment* new_env = extend_environment(func->value.lambda.params, args, func->value.lambda.env);
     return eval(func->value.lambda.body->value.pair.car, &new_env);
   }
 
   else {
-    printf("Error: the procedure being applied is neither a primitive or a lambda.");
+    printf("Error: the procedure being applied is neither a primitive nor a lambda.\n");
   }
   return NULL;
 }
+
+
 
 // Maps eval to a list of arguments in respect to an environment
 SchemeObject* map_eval(SchemeObject* args, Environment** env) {
