@@ -28,7 +28,6 @@ Environment* add_variable(Environment* env, char* name, SchemeObject* value) {
   new_env->name = strdup(name);
   new_env->value = value;
   new_env->next = env;
-
   return new_env;
 }
 
@@ -58,21 +57,10 @@ Environment* extend_environment(SchemeObject* params, SchemeObject* args, Enviro
     return env;
   }
 
-  // If the function expects 0 arguments and it got more than 0, returns a error
-  if (params->type == SCHEME_NIL && args->type != SCHEME_NIL) {
-    printf("Error: function expects 0 arguments but got at least 1.");
-    return NULL;
-  }
-
   // If one is nil or null and the other isn't, returns a error
   if (((params->type == SCHEME_NIL && args->type != SCHEME_NIL) || (params->type != SCHEME_NIL && args->type == SCHEME_NIL)) || (params == NULL || args == NULL)) {
     printf("Error: mismatch in parameter and argument lengths.");
     return NULL;
-  }
-
-  // If they are both nil, the list of parameters and arguments is over
-  if (params->type == SCHEME_NIL && args->type == SCHEME_NIL) {
-    return env;
   }
 
   // Adds a relation between parameter and argument to the environment

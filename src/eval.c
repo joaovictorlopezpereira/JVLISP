@@ -27,7 +27,7 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
     case SCHEME_PRIMITIVE:
       SchemeObject* value = lookup_variable(expr->value.symbol, *env);
       if (value == NULL) {
-        printf("Error: undefined variable '%s'", expr->value.symbol);
+        printf("Error: undefined variable '%s'.", expr->value.symbol);
       }
       return value;
 
@@ -128,7 +128,7 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
 
     // Checks if the number of arguments matches the expected number
     if (given_args != expected_args) {
-      printf("Error: Function expected %d arguments but got %d.", expected_args, given_args);
+      printf("Error: function expected %d arguments but got %d.", expected_args, given_args);
       return NULL;
     }
 
@@ -138,7 +138,7 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
   }
 
   else {
-    printf("Error: the procedure being applied is neither a primitive nor a lambda.\n");
+    printf("Error: the procedure being applied is neither a primitive nor a lambda.");
   }
   return NULL;
 }
