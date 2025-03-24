@@ -28,16 +28,19 @@ Token* tokenize(const char* input) {
       current++;
       continue;
     }
+
     // Scheme's (
     if (*current == '(') {
       tokens[token_count++] = (Token){TOKEN_LEFTPAREN, "("};
       current++;
     }
+
     // Scheme's )
     else if (*current == ')') {
       tokens[token_count++] = (Token){TOKEN_RIGHTPAREN, ")"};
       current++;
     }
+
     // Scheme's #t and #f
     else if (*current == '#' && (current[1] == 't' || current[1] == 'f')) {
       char* bool_str = (char*)malloc(3);
@@ -49,6 +52,7 @@ Token* tokenize(const char* input) {
       tokens[token_count++] = (Token){TOKEN_BOOLEAN, bool_str};
       current += 2;
     }
+
     // Scheme's nil
     else if ((*current == 'n' && current[1] == 'i' && current[2] == 'l') || (*current == '\'' && current[1] == '(' && current[2] == ')')) {
       char* bool_str = (char*)malloc(4);
@@ -74,6 +78,7 @@ Token* tokenize(const char* input) {
       num_str[len] = '\0';
       tokens[token_count++] = (Token){TOKEN_NUMBER, num_str};
     }
+
     // Scheme's string
     else if (*current == '"') {
       current++; // Skip opening quote

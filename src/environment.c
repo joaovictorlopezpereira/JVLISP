@@ -52,15 +52,15 @@ Environment* init_environment() {
 
 // Extends the environment given a list of parameters, arguments and the environment
 Environment* extend_environment(SchemeObject* params, SchemeObject* args, Environment* env) {
-  // If they are both NULL, return a error
+  // If they are both NULL, returns a error
   if (params == NULL && args == NULL) {
-    printf("error: parameters and arguments are both NULL");
+    printf("Error: parameters and arguments are both NULL.");
     return NULL;
   }
 
-  // If one is nil or null and the other isn't, return a error
+  // If one is nil or null and the other isn't, returns a error
   if (((params->type == SCHEME_NIL && args->type != SCHEME_NIL) || (params->type != SCHEME_NIL && args->type == SCHEME_NIL)) || (params == NULL || args == NULL)) {
-    printf("Error: Mismatch in parameter and argument lengths.\n");
+    printf("Error: Mismatch in parameter and argument lengths.");
     return NULL;
   }
 
@@ -69,18 +69,18 @@ Environment* extend_environment(SchemeObject* params, SchemeObject* args, Enviro
     return env;
   }
 
-  // Add a relation between parameter and argument to the environment
+  // Adds a relation between parameter and argument to the environment
   Environment* new_env = add_variable(env, params->value.pair.car->value.symbol, args->value.pair.car);
 
-  // Recursively extend the environment to the remaining variables
+  // Recursively extends the environment to the remaining variables
   return extend_environment(params->value.pair.cdr, args->value.pair.cdr, new_env);
 }
 
 // Frees the memory allocated by the environment
 void free_environment(Environment* env) {
   while (env != NULL) {
-    free(env->name);   // Free the name string
-    free(env->value);  // Free the SchemeObject value
+    free(env->name);   // Frees the name string
+    free(env->value);  // Frees the SchemeObject value
     Environment* temp = env;
     env = env->next;
     free(temp);

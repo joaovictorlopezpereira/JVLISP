@@ -11,8 +11,8 @@ SchemeObject* map_eval(SchemeObject* args, Environment** env);
 
 // Evaluates a given expression in respect to an environment
 SchemeObject* eval(SchemeObject* expr, Environment** env) {
-
-  if (expr == NULL) { // in case the parser launches a error that is passed to eval
+  // in case the parser launches a error that is passed to eval
+  if (expr == NULL) {
     return NULL;
   }
 
@@ -27,11 +27,16 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
     case SCHEME_PRIMITIVE:
       SchemeObject* value = lookup_variable(expr->value.symbol, *env);
       if (value == NULL) {
-        printf("Error: variable '%s' not found\n", expr->value.symbol);
+        printf("Error: undefined variable '%s'", expr->value.symbol);
       }
       return value;
 
     case SCHEME_PAIR:
+      // In case the user enters a input in which the first element is not a symbol
+      if (expr->value.pair.car->type != SCHEME_SYMBOL) {
+        printf("Error: application not a procedure.");
+        return NULL;
+      }
 
       // quote
       if (strcmp(expr->value.pair.car->value.symbol, "quote") == 0) {
@@ -46,11 +51,11 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
           value->value.lambda.env = add_variable(value->value.lambda.env, symbol->value.symbol, value);
         }
         if (lookup_variable(symbol->value.symbol, *env) != NULL) {
-          printf("Error: variable '%s' already defined", symbol->value.symbol);
+          printf("Error: variable '%s' already defined.", symbol->value.symbol);
           return NULL;
         }
         *env = add_variable(*env, symbol->value.symbol, value);
-        printf("%s defined in the global environment", symbol->value.symbol);
+        printf("Variable '%s' defined in the global environment.", symbol->value.symbol);
         return NULL;
       }
 
@@ -88,20 +93,20 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
 
 // Applies a given function to a list of arguments
 SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
-  // if it's a primitive, then simply apply the function to the arguments
+  // if it's a primitive, then simply applies the function to the arguments
   if (func->type == SCHEME_PRIMITIVE) {
     SchemeObject* (*f)(SchemeObject* args) = get_primitive_function(func->value.symbol);
     return f(args);
   }
 
-  // if it's a lambda, extend the environment and then apply the function to the respect in respect to the new environment
+  // if it's a lambda, extends the environment and then apply the function to the respect in respect to the new environment
   else if (func->type == SCHEME_LAMBDA) {
     Environment* new_env = extend_environment(func->value.lambda.params, args, func->value.lambda.env);
     return eval(func->value.lambda.body->value.pair.car, &new_env);
   }
 
   else {
-    printf("Error: Apply unknown case.");
+    printf("Error: the procedure being applied is neither a primitive or a lambda.");
   }
   return NULL;
 }

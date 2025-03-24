@@ -1,6 +1,6 @@
 #pragma once
 
-// Headers
+// Includes
 #include <stdio.h>
 #include "object.c"
 
@@ -20,15 +20,16 @@ SchemeObject* (*get_primitive_function(const char* symbol))(SchemeObject* args);
 // Scheme "+" procedure
 SchemeObject* primitive_add(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: + requires at least one argument.\n");
-    exit(1);
+    printf("Error: + requires at least one argument.");
+    return NULL;
+    // exit(1);
   }
 
   double acc = 0; // Accumulator
 
   while (args != NULL && args->type == SCHEME_PAIR) {
     if (args->value.pair.car->type != SCHEME_NUMBER) {
-      printf("Error: + only operates on numbers.\n");
+      printf("Error: + only operates on numbers.");
       exit(1);
     }
     acc += args->value.pair.car->value.number; // Accumulates the sum
@@ -41,12 +42,12 @@ SchemeObject* primitive_add(SchemeObject* args) {
 // Scheme "-" procedure
 SchemeObject* primitive_sub(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: - requires at least one argument.\n");
+    printf("Error: - requires at least one argument.");
     exit(1);
   }
 
   if (args->value.pair.car->type != SCHEME_NUMBER) {
-    printf("Error: - only operates on numbers.\n");
+    printf("Error: - only operates on numbers.");
     exit(1);
   }
 
@@ -55,7 +56,7 @@ SchemeObject* primitive_sub(SchemeObject* args) {
 
   while (args != NULL && args->type == SCHEME_PAIR) {
     if (args->value.pair.car->type != SCHEME_NUMBER) {
-      printf("Error: - only operates on numbers.\n");
+      printf("Error: - only operates on numbers.");
       exit(1);
     }
     acc -= args->value.pair.car->value.number; // Accumulates the sub
@@ -68,7 +69,7 @@ SchemeObject* primitive_sub(SchemeObject* args) {
 // Scheme "*" procedure
 SchemeObject* primitive_mul(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: * requires at least one argument.\n");
+    printf("Error: * requires at least one argument.");
     exit(1);
   }
 
@@ -76,7 +77,7 @@ SchemeObject* primitive_mul(SchemeObject* args) {
 
   while (args != NULL && args->type == SCHEME_PAIR) {
     if (args->value.pair.car->type != SCHEME_NUMBER) {
-      printf("Error: * only operates on numbers.\n");
+      printf("Error: * only operates on numbers.");
       exit(1);
     }
     acc *= args->value.pair.car->value.number; // Accumulates the sum
@@ -89,12 +90,12 @@ SchemeObject* primitive_mul(SchemeObject* args) {
 // Scheme "/" procedure
 SchemeObject* primitive_div(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: / requires at least one argument.\n");
+    printf("Error: / requires at least one argument.");
     exit(1);
   }
 
   if (args->value.pair.car->type != SCHEME_NUMBER) {
-    printf("Error: / only operates on numbers.\n");
+    printf("Error: / only operates on numbers.");
     exit(1);
   }
 
@@ -103,7 +104,7 @@ SchemeObject* primitive_div(SchemeObject* args) {
 
   while (args != NULL && args->type == SCHEME_PAIR) {
     if (args->value.pair.car->type != SCHEME_NUMBER) {
-      printf("Error: / only operates on numbers.\n");
+      printf("Error: / only operates on numbers.");
       exit(1);
     }
     acc /= args->value.pair.car->value.number; // Accumulates the sub
@@ -116,12 +117,12 @@ SchemeObject* primitive_div(SchemeObject* args) {
 // Scheme "=" procedure
 SchemeObject* primitive_equal_sign(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: = requires at least one argument.\n");
+    printf("Error: = requires at least one argument.");
     exit(1);
   }
 
   if (args->value.pair.car->type != SCHEME_NUMBER) {
-    printf("Error: = only operates on numbers.\n");
+    printf("Error: = only operates on numbers.");
     exit(1);
   }
 
@@ -130,7 +131,7 @@ SchemeObject* primitive_equal_sign(SchemeObject* args) {
 
   while (args != NULL && args->type == SCHEME_PAIR) {
     if (args->value.pair.car->type != SCHEME_NUMBER) {
-      printf("Error: = only operates on numbers.\n");
+      printf("Error: = only operates on numbers.");
       exit(1);
     }
     if (args->value.pair.car->value.number != first) {
@@ -145,17 +146,17 @@ SchemeObject* primitive_equal_sign(SchemeObject* args) {
 // Scheme "cons" procedure
 SchemeObject* primitive_cons(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: cons requires at least 2 arguments.\n");
+    printf("Error: cons requires at least 2 arguments.");
     exit(1);
   }
 
   if (args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
-    printf("Error: cons requires a valid second argument.\n");
+    printf("Error: cons requires a valid second argument.");
     exit(1);
   }
 
   if (args->value.pair.cdr->value.pair.cdr->type == SCHEME_PAIR) {
-    printf("Error: cons does not require more than 2 arguments.\n");
+    printf("Error: cons does not require more than 2 arguments.");
     exit(1);
   }
 
@@ -165,12 +166,12 @@ SchemeObject* primitive_cons(SchemeObject* args) {
 // Scheme "car" procedure
 SchemeObject* primitive_car(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: car requires at least 1 arguments.\n");
+    printf("Error: car requires at least 1 arguments.");
     exit(1);
   }
 
   if (args->value.pair.car->type != SCHEME_PAIR) {
-    printf("Error: car only operates on pairs");
+    printf("Error: car only operates on pairs.");
     exit(1);
   }
 
@@ -180,12 +181,12 @@ SchemeObject* primitive_car(SchemeObject* args) {
 // Scheme "cdr" procedure
 SchemeObject* primitive_cdr(SchemeObject* args) {
   if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: cdr requires at least 1 arguments.\n");
+    printf("Error: cdr requires at least 1 arguments.");
     exit(1);
   }
 
   if (args->value.pair.car->type != SCHEME_PAIR) {
-    printf("Error: cdr only operates on pairs");
+    printf("Error: cdr only operates on pairs.");
     exit(1);
   }
 

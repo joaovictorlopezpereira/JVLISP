@@ -26,7 +26,7 @@ SchemeObject* parser(Token** tokens) {
       break;
 
     case TOKEN_RIGHTPAREN:
-      printf("Error: there's a left parenthesis missing.\n");
+      printf("Error: there's a left parenthesis missing.");
       return NULL;
 
     case TOKEN_BOOLEAN:
@@ -54,10 +54,9 @@ SchemeObject* parser(Token** tokens) {
       break;
 
     default:
-      printf("Error: Unexpected token.\n");
-      exit(1);
+      printf("Error: unexpected token.");
+      return NULL;
   }
-
   return expression;
 }
 
@@ -80,8 +79,9 @@ SchemeObject* parse_list(Token** tokens) {
   if (current_token->type == TOKEN_RIGHTPAREN) {
     (*tokens)++;
   }
+
   else if (current_token->type == TOKEN_EOF) {
-    printf("Error: expected closing parenthesis.\n");
+    printf("Error: expected closing parenthesis.");
     return NULL;
   }
 
