@@ -79,11 +79,19 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
 
       // Primitive or Lambda
       SchemeObject* first = eval(expr->value.pair.car, env);
+
+      // If first is NULL, then the first element of the pair is not defined.
+      if (first == NULL) {
+        // Error will appear when 'first = eval' is computed
+        return NULL;
+      }
+
       if (first->type == SCHEME_PRIMITIVE || first->type == SCHEME_LAMBDA) {
         SchemeObject* args = map_eval(expr->value.pair.cdr, env);
         return apply(first, args);
       }
 
+      printf("Error: variable is not a procedure.");
       return NULL;
 
     default:
