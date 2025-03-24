@@ -12,6 +12,7 @@ void REPL() {
   char* input = malloc(256 * sizeof(char));
   Environment* global_environment = init_environment();
   Token* tokens = NULL;
+  Token* original_tokens = NULL;
 
   printf("\nWelcome to JVLISP! :)");
 
@@ -22,21 +23,23 @@ void REPL() {
     input[strcspn(input, "\n")] = 0;
     if (strcmp(input, "(bye)") == 0) break;
 
-    // Frees old allocated tokens and tokenizes the input
-    // if (tokens != NULL) free_tokens(tokens); // why does this line crash the program?
+    // Tokenizes the input and saves a pointer to the begining of the tokens
     tokens = tokenize(input);
-
-    // // Removes syntactic sugar
-    // desugar(&tokens);
+    original_tokens = tokens;
 
     // Parse, evaluate and print the result
     SchemeObject* expr = parser(&tokens);
     SchemeObject* result = eval(expr, &global_environment);
     print_scheme_object(result);
+
+    // Frees the already used allocated tokens
+    free_tokens(original_tokens);
   }
 
   // Frees some allocated memory
-  free_tokens(tokens);
+  printf("test\n");
+  free_tokens(original_tokens);
+  printf("test\n");
   free(input);
   free_environment(global_environment);
 

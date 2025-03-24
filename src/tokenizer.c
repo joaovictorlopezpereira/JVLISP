@@ -11,6 +11,7 @@
 // Functions Signatures
 Token* tokenize(const char* input);
 void free_tokens(Token* tokens);
+void print_tokens(Token* tokens);
 
 
 // Tokenizes the input
@@ -97,7 +98,7 @@ Token* tokenize(const char* input) {
         str_val[current - start] = '\0';
         tokens[token_count++] = (Token){TOKEN_STRING, str_val};
         current++; // Skip closing quote
-      } 
+      }
       else {
         printf("Error: string not closed.\n");
       }
@@ -123,9 +124,26 @@ Token* tokenize(const char* input) {
 
 // Frees memory allocated to tokens
 void free_tokens(Token* tokens) {
+  print_tokens(tokens);
   if (!tokens) return;
   for (int i = 0; tokens[i].type != TOKEN_EOF; i++) {
-    free(tokens[i].value);
+    if (tokens[i].value) {
+      free(tokens[i].value);
+    }
   }
   free(tokens);
+}
+
+void print_tokens(Token* tokens) {
+  if (!tokens) {
+    printf("Nenhum token para imprimir.\n");
+    return;
+  }
+
+  int i = 0;
+  while (tokens[i].type != TOKEN_EOF) {
+    printf("Token %d: Tipo = %d, Valor = %s\n", i, tokens[i].type, tokens[i].value ? tokens[i].value : "NULL");
+    i++;
+  }
+  printf("Token %d: Tipo = TOKEN_EOF\n", i);
 }
