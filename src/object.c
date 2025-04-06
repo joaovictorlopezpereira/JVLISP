@@ -57,8 +57,8 @@ SchemeObject* make_pair(SchemeObject* car, SchemeObject* cdr) {
 SchemeObject* make_primitive(SchemeObject* (*func)(SchemeObject* args), const char* string) {
   SchemeObject* object = (SchemeObject*)malloc(sizeof(SchemeObject));
   object->type = SCHEME_PRIMITIVE;
-  object->value.primitive = func;
-  object->value.symbol = strdup(string);
+  object->value.primitive.function = func;
+  object->value.primitive.symbol = strdup(string);
   return object;
 }
 

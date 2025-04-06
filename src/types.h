@@ -25,7 +25,10 @@ typedef struct SchemeObject {
       struct SchemeObject *car;
       struct SchemeObject *cdr;
     } pair;
-    struct SchemeObject *(*primitive)(struct SchemeObject *args);
+    struct{
+      char *symbol;
+      struct SchemeObject *(*function)(struct SchemeObject *args);
+    } primitive;
     struct {
       struct SchemeObject *params;
       struct SchemeObject *body;
@@ -48,7 +51,7 @@ typedef struct {
   SchemeObject* (*function)(SchemeObject* args);
 } PrimitiveMapping;
 
-// A Token type is either (, ), a symbol, a number a EOF or invalid
+// A Token type is either a parenthesis, boolean, symbol, number, string, nil or eof
 typedef enum {
   TOKEN_LEFTPAREN,  // (
   TOKEN_RIGHTPAREN, // )
