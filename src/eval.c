@@ -40,7 +40,11 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
 
       // quote
       if (strcmp(expr->value.pair.car->value.symbol, "quote") == 0) {
-        return expr->value.pair.cdr;
+        if (expr->value.pair.cdr->value.pair.cdr->type == SCHEME_PAIR) {
+          printf("Error: quote operates on a single argument.");
+          return NULL;
+        }
+        return expr->value.pair.cdr->value.pair.car;
       }
 
       // define
