@@ -8,6 +8,7 @@
 void REPL();
 
 
+// Does the READ, EVAL, PRINT, LOOP cycle
 void REPL() {
   char* input = malloc(256 * sizeof(char));
   Environment* global_environment = init_environment();
@@ -37,7 +38,6 @@ void REPL() {
   }
 
   // Frees some allocated memory
-  free_tokens(original_tokens);
   free(input);
   free_environment(global_environment);
 
