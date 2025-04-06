@@ -24,13 +24,13 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
       return expr;
 
     case SCHEME_SYMBOL:
-    case SCHEME_PRIMITIVE:
+    case SCHEME_PRIMITIVE:{
       SchemeObject* value = lookup_variable(expr->value.symbol, *env);
       if (value == NULL) {
         printf("Error: undefined variable '%s'.", expr->value.symbol);
       }
       return value;
-
+    }
     case SCHEME_PAIR:
       // In case the user enters a input in which the first element is not a symbol
       if (expr->value.pair.car->type != SCHEME_SYMBOL) {
