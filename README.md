@@ -54,4 +54,4 @@ By now, the interpreter is still in development. However, a few special forms an
 
 ## See Also
 
-My other works around ``Scheme``'s metacircular evaluator can be found at [Metacircular-Evaluator](https://github.com/joaovictorlopezpereira/Metacircular-Evaluator).
+One of my projects around ``Scheme``'s metacircular evaluator can be found at [Metacircular-Evaluator](https://github.com/joaovictorlopezpereira/Metacircular-Evaluator).
