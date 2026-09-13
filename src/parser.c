@@ -24,7 +24,7 @@ SchemeObject* parser(Token** tokens) {
       break;
 
     case TOKEN_RIGHTPAREN:
-      printf("Error: there's a left parenthesis missing.");
+      printf("Error: there's a left parenthesis missing.\n");
       return NULL;
 
     case TOKEN_BOOLEAN:
@@ -52,7 +52,7 @@ SchemeObject* parser(Token** tokens) {
       break;
 
     default:
-      printf("Error: unexpected token.");
+      printf("Error: unexpected token.\n");
       return NULL;
   }
   return expression;
@@ -60,28 +60,36 @@ SchemeObject* parser(Token** tokens) {
 
 // Parses a Scheme list
 SchemeObject* parse_list(Token** tokens) {
-  Token* current_token = *tokens;
 
-  SchemeObject* head = make_nil();
-  SchemeObject* tail = head;
-
-  while (current_token->type != TOKEN_RIGHTPAREN && current_token->type != TOKEN_EOF) {
-    SchemeObject* element = parser(tokens);
-    SchemeObject* pair = make_pair(element, make_nil());
-
-    tail->value.pair.cdr = pair;
-    tail = pair;
-    current_token = *tokens;
+  // Base case: empty list
+  if ((*tokens)->type == TOKEN_RIGHTPAREN) {
+    (*tokens)++;
+    return make_nil();
   }
 
-  if (current_token->type == TOKEN_RIGHTPAREN) {
+  SchemeObject* head = NULL;
+  SchemeObject** curr = &head;
+
+  while ((*tokens)->type != TOKEN_RIGHTPAREN && (*tokens)->type != TOKEN_EOF) {
+    SchemeObject* element = parser(tokens);
+
+    // Syntax error
+    if (element == NULL) {
+      return NULL;
+    }
+
+    *curr = make_pair(element, make_nil());
+    curr = &((*curr)->value.pair.cdr);
+  }
+
+  if ((*tokens)->type == TOKEN_RIGHTPAREN) {
     (*tokens)++;
   }
 
-  else if (current_token->type == TOKEN_EOF) {
-    printf("Error: expected closing parenthesis.");
+  else {
+    printf("Error: expected closing parenthesis.\n");
     return NULL;
   }
 
-  return head->value.pair.cdr;
+  return head;
 }
