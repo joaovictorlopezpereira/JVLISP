@@ -56,22 +56,39 @@ Environment* init_environment() {
   return env;
 }
 
+// Auxiliar function to check if a list has ended
+static inline int is_empty_list(SchemeObject* obj) {
+  return obj == NULL || obj->type == SCHEME_NIL;
+}
+
 // Extends the environment given a list of parameters, arguments and the environment
 Environment* extend_environment(SchemeObject* params, SchemeObject* args, Environment* env) {
 
   // If they are both NULL or NIL, returns the current environment
-  if ((params == NULL || params->type == SCHEME_NIL) && (args == NULL || args->type == SCHEME_NIL)) {
+  if (is_empty_list(params) && is_empty_list(args)) {
     return env;
   }
 
-  // If one is nil or null and the other isn't, returns a error
-  if (((params->type == SCHEME_NIL && args->type != SCHEME_NIL) || (params->type != SCHEME_NIL && args->type == SCHEME_NIL)) || (params == NULL || args == NULL)) {
-    printf("Error: mismatch in parameter and argument lengths.");
+  // If one is either nil or null and the other isn't, returns a error
+  if (is_empty_list(params) || is_empty_list(args)) {
+    printf("Error: mismatch in parameter and argument lengths.\n");
+    return NULL;
+  }
+
+  // Valids the types in the list
+  if (params->type != SCHEME_PAIR || args->type != SCHEME_PAIR) {
+    printf("Error: invalir parameter or argument structure.\n");
+    return NULL;
+  }
+
+  SchemeObject* param_sym = params->value.pair.car;
+  if (param_sym == NULL || param_sym->type != SCHEME_SYMBOL) {
+    printf("Error: formal parameters must be symbols\n");
     return NULL;
   }
 
   // Adds a relation between parameter and argument to the environment
-  Environment* new_env = add_variable(env, params->value.pair.car->value.symbol, args->value.pair.car);
+  Environment* new_env = add_variable(env, param_sym->value.symbol, args->value.pair.car);
 
   // Recursively extends the environment to the remaining variables
   return extend_environment(params->value.pair.cdr, args->value.pair.cdr, new_env);
@@ -80,8 +97,7 @@ Environment* extend_environment(SchemeObject* params, SchemeObject* args, Enviro
 // Frees the memory allocated by the environment
 void free_environment(Environment* env) {
   while (env != NULL) {
-    free(env->name);   // Frees the name string
-    free(env->value);  // Frees the SchemeObject value
+    free(env->name); // Frees strdup done in add_variable
     Environment* temp = env;
     env = env->next;
     free(temp);
