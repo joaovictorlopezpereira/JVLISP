@@ -44,11 +44,21 @@ depending on which operational system the code was compiled.
 
 ## Features
 
-By now, the interpreter is still in development. However, a few special forms and primitives are available:
+JVLISP is an interpreted Scheme dialect implemented in C, currently under active development. The engine implements core Lisp semantics, including lexical closures, first-class procedures, and recursion:
 
-- Special forms: ``define``, ``lambda``, ``if`` and ``quote``;
-- Primitives: ``+``, ``-``, ``*``, ``/``, ``=``, ``cons``, ``car`` and ``cdr``.
-- Other features:  ``nil`` or ``'()``, recursion and dynamic scope.
+- **Special Forms:** `define`, `lambda`, `if`, and `quote`.
+- **Arithmetic:** `+`, `-`, `*`, `/` (including unary negation and reciprocal).
+- **Numerical Comparison:** `=`, `<`, `>`, `<=`, `>=` (multi-argument monotonic checks).
+- **Type Predicates:** `null?`, `pair?`, `number?`, `symbol?`, `boolean?`.
+- **Pairs & Lists:** `cons`, `car`, `cdr`, and the empty list (`'()` / `nil`).
+- **I/O:** `display`.
+- **Core Semantics:**
+  - **Lexical Scope & Closures:** Lambdas capture their defining environment (`lambda.env`).
+  - **First-Class Procedures:** Functions and primitives can be bound, passed, and referenced.
+  - **Recursion:** Full support for recursive definitions without state mutation (immutable environment model).
+- **Tooling:**
+  - Interactive REPL.
+  - Built-in automated test suite via the `(test_primitives)` primitive.
 
 -----
 
