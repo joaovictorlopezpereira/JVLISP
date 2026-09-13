@@ -71,7 +71,7 @@ SchemeObject* make_lambda(SchemeObject* params, SchemeObject* body, Environment*
 }
 
 // Creates a Scheme boolean
-SchemeObject* make_boolean(const char * string) {
+SchemeObject* make_boolean(const char* string) {
   SchemeObject* object = (SchemeObject*)malloc(sizeof(SchemeObject));
   object->type = SCHEME_BOOLEAN;
   if (strcmp(string, "#t") == 0) {
@@ -102,18 +102,22 @@ void free_scheme_object(SchemeObject* object) {
     case SCHEME_STRING:
       free(object->value.string);
       break;
+    case SCHEME_PRIMITIVE:
+      free(object->value.primitive.symbol);
+      break;
     case SCHEME_PAIR:
       free_scheme_object(object->value.pair.car);
       free_scheme_object(object->value.pair.cdr);
       break;
     case SCHEME_LAMBDA:
-      free_scheme_object(object->value.lambda.body);
-      free(object->value.lambda.env);
       free_scheme_object(object->value.lambda.params);
+      free_scheme_object(object->value.lambda.body);
+      // free(object->value.lambda.env);
       break;
     default: // SCHEME_NUMBER, SCHEME_BOOLEAN, SCHEME_PRIMITIVE e SCHEME_NIL
       break;  // These types do not allocate memory dynamically, so nothing to free
   }
+  free(object);
 }
 
 // Prints the SchemeObject
@@ -131,28 +135,35 @@ void print_scheme_object(SchemeObject* object) {
       break;
 
     case SCHEME_STRING:
-      // printf("\"%s\"", object->value.string);
-      printf("%s", object->value.string);
+      printf("\"%s\"", object->value.string);
       break;
 
-    case SCHEME_PAIR:
+    case SCHEME_PAIR: {
       printf("(");
-      print_scheme_object(object->value.pair.car);
-      if (object->value.pair.cdr != NULL) {
-        if (object->value.pair.cdr->type == SCHEME_PAIR) {
-          printf(" ");
-          print_scheme_object(object->value.pair.cdr);
+      SchemeObject* curr = object;
+      while (curr->type == SCHEME_PAIR) {
+        print_scheme_object(curr->value.pair.car);
+        curr = curr->value.pair.cdr;
+        if (curr == NULL) {
+          break;
         }
-        else {
+
+        if (curr->type == SCHEME_PAIR) {
+          printf(" ");
+        }
+
+        else if (curr->type != SCHEME_NIL) {
           printf(" . ");
-          print_scheme_object(object->value.pair.cdr);
+          print_scheme_object(curr);
+          break;
         }
       }
       printf(")");
       break;
+    }
 
     case SCHEME_PRIMITIVE:
-      printf("<primitive>");
+      printf("<primitive:%s>", object->value.primitive.symbol);
       break;
 
     case SCHEME_LAMBDA:
@@ -168,7 +179,7 @@ void print_scheme_object(SchemeObject* object) {
       break;
 
     default:
-      printf("<unknown type>");
+      printf("<unknown>");
       break;
   }
 }
