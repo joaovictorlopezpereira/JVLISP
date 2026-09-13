@@ -26,6 +26,14 @@ Token* tokenize(const char* input) {
       continue;
     }
 
+    // Ignores comments started by ';' until the end of the line
+    if (*current == ';') {
+      while (*current != '\0' && *current != '\n') {
+        current++;
+      }
+      continue;
+    }
+
     // Enlarges the tokens if necessary
     if (token_count >= capacity - 1) {
       capacity *= 2;
