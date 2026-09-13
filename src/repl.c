@@ -1,6 +1,7 @@
 // Includes
 #include "parser.c"
 #include "eval.c"
+#include "tests.c"
 
 // Functions Signatures
 void REPL();
@@ -13,6 +14,12 @@ void REPL() {
   // Initialize the environment with primitives procedures
   Environment* global_environment = init_environment();
 
+  // Expand the environment to contain test procedures
+  global_environment = add_variable(
+    global_environment,
+    "test_primitives",
+    make_primitive(primitive_test_primitives, "test_primitives")
+  );
 
   printf("Welcome to JVLISP! :)\n");
 
