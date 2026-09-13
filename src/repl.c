@@ -5,39 +5,65 @@
 // Functions Signatures
 void REPL();
 
-
 // Does the READ, EVAL, PRINT, LOOP cycle
 void REPL() {
-  char* input = malloc(256 * sizeof(char));
+  size_t buffer_size = 1024;
+  char* input = (char*)malloc(buffer_size * sizeof(char));
+
+  // Initialize the environment with primitives procedures
   Environment* global_environment = init_environment();
-  Token* tokens = NULL;
-  Token* original_tokens = NULL;
 
-  printf("\nWelcome to JVLISP! :)");
 
-  while(1) {
-    // Gets the user input and checks if it's a "(bye)"
-    printf("\n\nJVLISP >> ");
-    fgets(input, 256, stdin);
-    input[strcspn(input, "\n")] = 0;
-    if (strcmp(input, "(bye)") == 0) break;
+  printf("Welcome to JVLISP! :)\n");
 
-    // Tokenizes the input and saves a pointer to the begining of the tokens
-    tokens = tokenize(input);
-    original_tokens = tokens;
+  while (1) {
+    printf("JVLISP >> ");
+    fflush(stdout);
 
-    // Parse, evaluate and print the result
+    // Captures user input
+    if (fgets(input, buffer_size, stdin) == NULL) {
+      printf("\n");
+      break;
+    }
+
+    // Removes line break
+    input[strcspn(input, "\r\n")] = '\0';
+
+    // Ignore empty inputs
+    if (input[0] == '\0') {
+      continue;
+    }
+
+    // User command to leave the program
+    if (strcmp(input, "(bye)") == 0) {
+      break;
+    }
+
+    // Tokenizing
+    Token* tokens = tokenize(input);
+    Token* original_tokens = tokens;
+
+    // Parsing
     SchemeObject* expr = parser(&tokens);
-    SchemeObject* result = eval(expr, &global_environment);
-    print_scheme_object(result);
 
-    // Frees the already used allocated tokens
+    if (expr != NULL) {
+      // Evaluating
+      SchemeObject* result = eval(expr, &global_environment);
+
+      // Printing
+      if (result != NULL) {
+        print_scheme_object(result);
+        printf("\n");
+      }
+    }
+
+    // Free tokens
     free_tokens(original_tokens);
   }
 
-  // Frees some allocated memory
+  // Final free
   free(input);
   free_environment(global_environment);
 
-  printf("\nThanks for using JVLISP! :)\n");
+  printf("Thanks for using JVLISP! :)\n");
 }
