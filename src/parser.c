@@ -7,11 +7,9 @@
 #include "primitives.c"
 #include "tokenizer.c"
 
-
 // Functions Signatures
 SchemeObject* parse_list(Token** tokens);
 SchemeObject* parser(Token** tokens);
-
 
 // Parses a list of given tokens
 SchemeObject* parser(Token** tokens) {

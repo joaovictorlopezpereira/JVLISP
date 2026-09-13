@@ -1,5 +1,6 @@
 @echo off
 
+@REM  Variables
 set SRC_DIR=src
 set OUTPUT_FILE=jvlisp.exe
 

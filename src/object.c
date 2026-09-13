@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include "types.h"
 
-
 // Functions Signatures
 SchemeObject* make_number(double number);
 SchemeObject* make_symbol(const char* symbol);
@@ -18,7 +17,6 @@ SchemeObject* make_boolean(const char* string);
 SchemeObject* make_nil();
 void free_scheme_object(SchemeObject* object);
 void print_scheme_object(SchemeObject* object);
-
 
 // Creates a Scheme number
 SchemeObject* make_number(double number) {

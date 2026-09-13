@@ -1,5 +1,9 @@
 #pragma once
 
+// Types Signatures
+typedef struct SchemeObject SchemeObject;
+typedef struct Environment Environment;
+
 // A Scheme type is either a number, a symbol, a string, a pair, a primitive, a lambda, a boolean or a nil.
 typedef enum {
   SCHEME_NUMBER,

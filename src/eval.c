@@ -2,16 +2,15 @@
 // Includes
 #include "environment.c"
 
-
 // Functions Signatures
 SchemeObject* eval(SchemeObject* expr, Environment** env);
 SchemeObject* apply(SchemeObject* func, SchemeObject* args);
 SchemeObject* map_eval(SchemeObject* args, Environment** env);
 
-
 // Evaluates a given expression in respect to an environment
 SchemeObject* eval(SchemeObject* expr, Environment** env) {
   // in case the parser launches a error that is passed to eval
+
   if (expr == NULL) {
     return NULL;
   }
@@ -146,8 +145,6 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
   }
   return NULL;
 }
-
-
 
 // Maps eval to a list of arguments in respect to an environment
 SchemeObject* map_eval(SchemeObject* args, Environment** env) {

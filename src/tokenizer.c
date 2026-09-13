@@ -7,11 +7,9 @@
 #include "object.c"
 #include "types.h"
 
-
 // Functions Signatures
 Token* tokenize(const char* input);
 void free_tokens(Token* tokens);
-
 
 // Tokenizes the input
 Token* tokenize(const char* input) {
@@ -131,4 +129,3 @@ void free_tokens(Token* tokens) {
   }
   free(tokens);
 }
-

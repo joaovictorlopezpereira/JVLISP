@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "object.c"
 
-
 // Functions Signatures
 SchemeObject* (*get_primitive_function(const char* symbol))(SchemeObject* args);
 SchemeObject* primitive_add(SchemeObject* args);
@@ -225,6 +224,7 @@ SchemeObject* primitive_display(SchemeObject* args) {
     else {
       print_scheme_object(args->value.pair.car);
     }
+
     printf(" ");
     args = args->value.pair.cdr;
   }
