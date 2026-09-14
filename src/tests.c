@@ -60,6 +60,7 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
     { "(* 2 3 4)", "24" },
     { "(/ 12 3)", "4" },
     { "(/ 2)", "0.5" },
+    { "(* 2 5 (+ 1 2 3 0))", "60" },
 
     // Types predicates
     { "(null? (quote ()))", "#t" },
@@ -84,12 +85,20 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
     // Lists
     { "(car (cons 10 20))", "10" },
     { "(cdr (cons 10 20))", "20" },
+    { "(car (cdr (cons 10 (cons 20 '()))))", "20" },
 
     // Ifs and Lambdas
     { "(if #t 10 20)", "10" },
     { "(if #f 10 20)", "20" },
+    { "(if (> 10 5) 1 2)", "1"},
+    { "(if (>= 10 20) 1 2)", "2"},
     { "((lambda (x) (* x x)) 5)", "25" },
     { "((lambda (x y) (+ x y)) 3 4)", "7" },
+
+    // Define
+    { "(define x 2)", "()" },
+    { "x", "2" },
+    { "(* x 10)", "20" },
   };
 
   int total = sizeof(tests) / sizeof(TestCase);
