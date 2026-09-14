@@ -162,7 +162,10 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
     }
 
     // Extends the environment and evaluates the function
+    // TODO: I guess this functional call is not working correctly. The env in which the lambda env should be
+    // evaluated should be the env where it was defined. Is this what is being done?
     Environment* new_env = extend_environment(func->value.lambda.params, args, func->value.lambda.env);
+
     return eval(func->value.lambda.body->value.pair.car, &new_env);
   }
 

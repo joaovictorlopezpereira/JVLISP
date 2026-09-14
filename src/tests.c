@@ -99,6 +99,7 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
     { "(define x 2)", "(quote x)" },
     { "x", "2" },
     { "(* x 10)", "20" },
+    { "(define g (lambda () (define pi 3) pi)) (g)", "3" }
   };
 
   int total = sizeof(tests) / sizeof(TestCase);
