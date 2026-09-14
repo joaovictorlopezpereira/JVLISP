@@ -66,8 +66,8 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
         }
 
         *env = add_variable(*env, symbol->value.symbol, value);
-        printf("Variable '%s' defined in the global environment.\n", symbol->value.symbol);
-        return make_nil();
+        // printf("Variable '%s' defined in the global environment.\n", symbol->value.symbol);
+        return symbol;
       }
 
       // lambda
