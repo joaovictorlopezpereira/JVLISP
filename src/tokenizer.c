@@ -42,13 +42,13 @@ Token* tokenize(const char* input) {
 
     // Scheme's (
     if (*current == '(') {
-      tokens[token_count++] = (Token){TOKEN_LEFTPAREN, _strdup("(")};
+      tokens[token_count++] = (Token){TOKEN_LEFTPAREN, strdup("(")};
       current++;
     }
 
     // Scheme's )
     else if (*current == ')') {
-      tokens[token_count++] = (Token){TOKEN_RIGHTPAREN, _strdup(")")};
+      tokens[token_count++] = (Token){TOKEN_RIGHTPAREN, strdup(")")};
       current++;
     }
 
@@ -66,7 +66,7 @@ Token* tokenize(const char* input) {
 
     // Scheme's nil
     else if (strncmp(current, "'()", 3) == 0) {
-      tokens[token_count++] = (Token){TOKEN_NIL, _strdup("'()")};
+      tokens[token_count++] = (Token){TOKEN_NIL, strdup("'()")};
       current += 3;
     }
 
