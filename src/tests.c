@@ -46,6 +46,7 @@ static SchemeObject* eval_string(const char* code, Environment** env) {
 
 // Structure of tests
 typedef struct {
+  const char* name;
   const char* expr;
   const char* expected;
 } TestCase;
@@ -54,52 +55,92 @@ typedef struct {
 SchemeObject* primitive_test_primitives(SchemeObject* args) {
   TestCase tests[] = {
     // Arithmetic
-    { "(+ 1 2 3)", "6" },
-    { "(- 10 3 2)", "5" },
-    { "(- 5)", "-5" },
-    { "(* 2 3 4)", "24" },
-    { "(/ 12 3)", "4" },
-    { "(/ 2)", "0.5" },
-    { "(* 2 5 (+ 1 2 3 0))", "60" },
+    {"+ with 3 arguments", "(+ 1 2 3)", "6" },
+    {"- with 3 arguments", "(- 10 3 2)", "5" },
+    {"- with 1 argument", "(- 5)", "-5" },
+    {"* with 3 arguments", "(* 2 3 4)", "24" },
+    {"/ with 2 arguments", "(/ 12 3)", "4" },
+    {"/ with 1 argument", "(/ 2)", "0.5" },
+    {"Nested arithmetic expression", "(* 2 5 (+ 1 2 3 0))", "60" },
 
     // Types predicates
-    { "(null? (quote ()))", "#t" },
-    { "(null? 1)", "#f" },
-    { "(pair? (cons 1 2))", "#t" },
-    { "(pair? (quote ()))", "#f" },
-    { "(number? 42)", "#t" },
-    { "(number? #t)", "#f" },
-    { "(boolean? #t)", "#t" },
-    { "(boolean? 0)", "#f" },
-    { "(symbol? (quote x))", "#t" },
+    {"null? in empty list", "(null? (quote ()))", "#t" },
+    {"null? in nil", "(null? '())", "#t"},
+    {"null? in number", "(null? 1)", "#f" },
+    {"pair? in cons", "(pair? (cons 1 2))", "#t" },
+    {"pair? in empty list", "(pair? (quote ()))", "#f" },
+    {"number? in number", "(number? 42)", "#t" },
+    {"number? in bool", "(number? #t)", "#f" },
+    {"boolean? in #t", "(boolean? #t)", "#t" },
+    {"boolean? in #f", "(boolean? #f)", "#t" },
+    {"boolean? in number", "(boolean? 0)", "#f" },
+    {"symbol? in symbol", "(symbol? (quote x))", "#t" },
+    {"symbol? in number", "(symbol? 2)", "#f" },
 
     // Numerical comparison
-    { "(= 5 5 5)", "#t" },
-    { "(= 5 4)", "#f" },
-    { "(< 1 2 3)", "#t" },
-    { "(< 3 2 1)", "#f" },
-    { "(> 3 2 1)", "#t" },
-    { "(<= 1 1 2)", "#t" },
-    { "(>= 2 2 1)", "#t" },
+    {"= with 2 arguments", "(= 5 4)", "#f" },
+    {"= with 3 arguments", "(= 5 5 5)", "#t" },
+    {"< with 2 arguments", "(< 1 2)", "#t" },
+    {"< with 3 arguments", "(< 3 2 1)", "#f" },
+    {"> with 2 arguments", "(> 3 2)", "#t" },
+    {"<= with 3 arguments", "(<= 1 1 2)", "#t" },
+    {">= with 3 arguments", "(>= 2 2 1)", "#t" },
 
     // Lists
-    { "(car (cons 10 20))", "10" },
-    { "(cdr (cons 10 20))", "20" },
-    { "(car (cdr (cons 10 (cons 20 '()))))", "20" },
+    {"car of a pair", "(car (cons 10 20))", "10" },
+    {"cdr of a pair", "(cdr (cons 10 20))", "20" },
+    {"car of the cdr of a list", "(car (cdr (cons 10 (cons 20 '()))))", "20" },
 
     // Ifs and Lambdas
-    { "(if #t 10 20)", "10" },
-    { "(if #f 10 20)", "20" },
-    { "(if (> 10 5) 1 2)", "1"},
-    { "(if (>= 10 20) 1 2)", "2"},
-    { "((lambda (x) (* x x)) 5)", "25" },
-    { "((lambda (x y) (+ x y)) 3 4)", "7" },
+    {"if with #t", "(if #t 10 20)", "10" },
+    {"if with #f", "(if #f 10 20)", "20" },
+    {"if with actual predicate", "(if (> 10 5) 1 2)", "1"},
+    {"lambda with 1 argument", "((lambda (x) (* x x)) 5)", "25" },
+    {"lambda with 2 arguments", "((lambda (x y) (+ x y)) 3 4)", "7" },
 
-    // Define
-    { "(define x 2)", "(quote x)" },
-    { "x", "2" },
-    { "(* x 10)", "20" },
-    { "(define g (lambda () (define pi 3) pi)) (g)", "3" }
+    // Define and Environment
+    {"Variable definition", "(define x 2)", "(quote x)" },
+    {"Variable lookup", "x", "2" },
+    {"Variable evaluation in expression", "(* x 10)", "20" },
+    {"Procedure with internal define", "(define g (lambda () (define pi 3) pi))", "(quote g)" },
+    {"Local scope and sequence execution", "(g)", "3"},
+
+    // Lexical Scope, Closures and Environment Stress Tests
+    {
+      "Lexical scoping preserves defining environment",
+      "((lambda () (define base 10) (define add-base (lambda (y) (+ base y))) ((lambda (base) (add-base 1)) 99)))",
+      "11"
+    },
+    {
+      "Closures maintain independent state frames",
+      "((lambda () (define make-adder (lambda (n) (lambda (v) (+ n v)))) (define add5 (make-adder 5)) (define add20 (make-adder 20)) (+ (add5 2) (add20 2))))",
+      "29"
+    },
+    {
+      "Deep nested parameter shadowing",
+      "((((lambda (a) (lambda (b) (lambda (a) (+ a b)))) 1) 2) 3)",
+      "5"
+    },
+    {
+      "Closure passed as argument ignores caller bindings",
+      "((lambda () (define x 42) (define reader (lambda () x)) ((lambda (y z) (z)) 999 reader)))",
+      "42"
+    },
+    {
+      "Curried procedure chain evaluation",
+      "((((lambda (x) (lambda (y) (lambda (z) (* (+ x y) z)))) 2) 3) 4)",
+      "20"
+    },
+    {
+      "Sequence evaluation with multiple internal defines",
+      "((lambda () (define a 10) (define b 20) (+ a b)))",
+      "30"
+    },
+    {
+      "Parameter shadows outer procedure name",
+      "((lambda () (define op (lambda (n) (* n 2))) ((lambda (op) (+ op 5)) 10)))",
+      "15"
+    },
   };
 
   int total = sizeof(tests) / sizeof(TestCase);
@@ -117,15 +158,15 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
     SchemeObject* expected = eval_string(tests[i].expected, &shared_env);
 
     if (are_objects_equal(actual, expected)) {
-      printf("  [PASS] %-40s => ", tests[i].expr);
-      print_scheme_object(actual);
-      printf("\n");
+      printf("  [PASS] %s\n", tests[i].name);
       passed++;
     }
     else {
-      printf("  [FAIL] %-40s => Got: ", tests[i].expr);
+      printf("  [FAIL] %s\n", tests[i].name);
+      printf("         Expr:     %s\n", tests[i].expr);
+      printf("         Got:      ");
       print_scheme_object(actual);
-      printf(" | Expected: ");
+      printf("\n         Expected: ");
       print_scheme_object(expected);
       printf("\n");
     }
