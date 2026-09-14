@@ -96,7 +96,7 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
     { "((lambda (x y) (+ x y)) 3 4)", "7" },
 
     // Define
-    { "(define x 2)", "()" },
+    { "(define x 2)", "(quote x)" },
     { "x", "2" },
     { "(* x 10)", "20" },
   };
@@ -109,7 +109,10 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
   Environment* shared_env = init_environment();
   for (int i = 0; i < total; i++) {
 
+    // Evaluates the test expression
     SchemeObject* actual = eval_string(tests[i].expr, &shared_env);
+
+    // Evaluates the expected test result (be careful with tests that should return symbols)
     SchemeObject* expected = eval_string(tests[i].expected, &shared_env);
 
     if (are_objects_equal(actual, expected)) {
