@@ -95,33 +95,33 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
   int total = sizeof(tests) / sizeof(TestCase);
   int passed = 0;
 
-  printf("\n=== Executing Primitive Functions Tests ===\n\n");
+  printf("\n-8<--------Executing-Primitive-Functions-Tests-------->8-\n\n");
 
+  Environment* shared_env = init_environment();
   for (int i = 0; i < total; i++) {
-    Environment* test_env = init_environment();
 
-    SchemeObject* actual = eval_string(tests[i].expr, &test_env);
-    SchemeObject* expected = eval_string(tests[i].expected, &test_env);
+    SchemeObject* actual = eval_string(tests[i].expr, &shared_env);
+    SchemeObject* expected = eval_string(tests[i].expected, &shared_env);
 
     if (are_objects_equal(actual, expected)) {
-      printf("  [PASS] %-30s => ", tests[i].expr);
+      printf("  [PASS] %-40s => ", tests[i].expr);
       print_scheme_object(actual);
       printf("\n");
       passed++;
-    } else {
-      printf("  [FAIL] %-30s => Got: ", tests[i].expr);
+    }
+    else {
+      printf("  [FAIL] %-40s => Got: ", tests[i].expr);
       print_scheme_object(actual);
       printf(" | Expected: ");
       print_scheme_object(expected);
       printf("\n");
     }
-
-    free_environment(test_env);
   }
+  free_environment(shared_env);
 
-  printf("\n---------------------------------------\n");
-  printf("Result: %d/%d tests successful.\n", passed, total);
-  printf("=======================================\n\n");
+  printf("\n-8<--------------------------------------------------->8-\n");
+  printf("              Result: %d/%d tests successful.\n", passed, total);
+  printf("-8<--------------------------------------------------->8-\n\n");
 
   return make_boolean(passed == total ? "#t" : "#f");
 }
