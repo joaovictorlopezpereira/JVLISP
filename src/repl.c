@@ -17,8 +17,8 @@ void REPL() {
   // Expand the environment to contain test procedures
   global_environment = add_variable(
     global_environment,
-    "test_primitives",
-    make_primitive(primitive_test_primitives, "test_primitives")
+    "test-primitives",
+    make_primitive(primitive_test_primitives, "test-primitives")
   );
 
   printf("Welcome to JVLISP! :)\n");
