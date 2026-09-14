@@ -128,6 +128,23 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
   }
 }
 
+// Evaluates a list of expressions in order and returns the return of the last expression
+SchemeObject* eval_sequence(SchemeObject* exps, Environment** env) {
+  if (exps == NULL || exps->type == SCHEME_NIL) {
+    return make_nil();
+  }
+
+  SchemeObject* result = NULL;
+  while (exps != NULL && exps->type == SCHEME_PAIR) {
+    result = eval(exps->value.pair.car, env);
+    if (result == NULL) {
+      return NULL;
+    }
+    exps = exps->value.pair.cdr;
+  }
+  return result;
+}
+
 // Applies a given function to a list of arguments
 SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
 
@@ -162,11 +179,9 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
     }
 
     // Extends the environment and evaluates the function
-    // TODO: I guess this functional call is not working correctly. The env in which the lambda env should be
-    // evaluated should be the env where it was defined. Is this what is being done?
     Environment* new_env = extend_environment(func->value.lambda.params, args, func->value.lambda.env);
 
-    return eval(func->value.lambda.body->value.pair.car, &new_env);
+    return eval_sequence(func->value.lambda.body, &new_env);
   }
 
   else {
