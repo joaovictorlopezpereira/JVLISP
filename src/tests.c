@@ -141,6 +141,82 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
       "((lambda () (define op (lambda (n) (* n 2))) ((lambda (op) (+ op 5)) 10)))",
       "15"
     },
+
+    // Begin
+    {
+      "begin evaluates sequence and returns last value",
+      "(begin 1 2 3)",
+      "3"
+    },
+    {
+      "begin evaluates sequence with internal definitions",
+      "(begin (define a 10) (define b 20) (+ a b))",
+      "30"
+    },
+    {
+      "Nested begin expressions",
+      "(begin (begin (begin 42)))",
+      "42"
+    },
+
+    // Let
+    {
+      "let binds single variable",
+      "(let ((x 10)) (* x 2))",
+      "20"
+    },
+    {
+      "let binds multiple variables simultaneously",
+      "(let ((x 2) (y 3)) (+ x y))",
+      "5"
+    },
+    {
+      "let shadows outer variable within its body",
+      "((lambda () (define x 1) (let ((x 10)) x)))",
+      "10"
+    },
+    {
+      "let body does not leak bindings to outer environment",
+      "((lambda () (define x 1) (let ((x 10)) x) x))",
+      "1"
+    },
+    {
+      "let bindings evaluate in outer environment (not let*)",
+      "((lambda () (define x 5) (let ((x 2) (y x)) (+ x y))))",
+      "7"
+    },
+    {
+      "let supports multi-expression body",
+      "(let ((x 10)) (define y 5) (+ x y))",
+      "15"
+    },
+
+    // Cond
+    {
+      "cond executes first matching branch",
+      "(cond ((= 1 1) 10) (else 20))",
+      "10"
+    },
+    {
+      "cond falls through to subsequent branch",
+      "(cond ((= 1 2) 10) ((= 2 2) 20) (else 30))",
+      "20"
+    },
+    {
+      "cond falls through to else clause",
+      "(cond ((= 1 2) 10) ((= 3 4) 20) (else 3))",
+      "3"
+    },
+    {
+      "cond treats zero as truthy (Scheme semantics)",
+      "(cond (0 10) (else 0))",
+      "10"
+    },
+    {
+      "cond supports multi-expression consequence",
+      "(cond ((= 1 1) (define a 10) (+ a 5)) (else 0))",
+      "15"
+    },
   };
 
   int total = sizeof(tests) / sizeof(TestCase);
