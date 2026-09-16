@@ -3,9 +3,227 @@
 #include "environment.c"
 
 // Functions Signatures
+static int is_truthy(SchemeObject* obj);
+static SchemeObject* eval_symbol(SchemeObject* expr, Environment* env);
+static SchemeObject* eval_quote(SchemeObject* args);
+static SchemeObject* eval_define(SchemeObject* args, Environment** env);
+static SchemeObject* eval_if(SchemeObject* args, Environment** env);
+static SchemeObject* eval_lambda(SchemeObject* args, Environment* env);
+static SchemeObject* cond_to_if(SchemeObject* clauses);
+static SchemeObject* eval_cond(SchemeObject* clauses, Environment** env);
+static SchemeObject* let_to_combination(SchemeObject* args);
+static SchemeObject* eval_let(SchemeObject* args, Environment** env);
+static SchemeObject* eval_sequence(SchemeObject* exps, Environment** env);
+static SchemeObject* map_eval(SchemeObject* args, Environment** env);
 SchemeObject* eval(SchemeObject* expr, Environment** env);
 SchemeObject* apply(SchemeObject* func, SchemeObject* args);
-SchemeObject* map_eval(SchemeObject* args, Environment** env);
+
+// Verifies if a given Scheme Object is true or false
+static int is_truthy(SchemeObject* obj) {
+  if (obj != NULL && obj->type == SCHEME_BOOLEAN && obj->value.boolean == 0) {
+    return 0;
+  }
+  return 1;
+}
+
+// Evaluates a given symbol (looks for its value in the environment)
+static SchemeObject* eval_symbol(SchemeObject* expr, Environment* env) {
+  SchemeObject* value = lookup_variable(expr->value.symbol, env);
+  if (value == NULL) {
+    printf("Error: undefined variable '%s'.\n", expr->value.symbol);
+  }
+  return value;
+}
+
+// Evaluates a quote special form
+static SchemeObject* eval_quote(SchemeObject* args) {
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: quote operates on a single argument.\n");
+    return NULL;
+  }
+  return args->value.pair.car;
+}
+
+// Evaluates a define special form
+static SchemeObject* eval_define(SchemeObject* args, Environment** env) {
+  if (args == NULL || args->type != SCHEME_PAIR || args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
+    printf("Error: malformed define.\n");
+    return NULL;
+  }
+
+  SchemeObject* symbol = args->value.pair.car;
+  SchemeObject* value = eval(args->value.pair.cdr->value.pair.car, env);
+
+  if (value == NULL) {
+    return NULL;
+  }
+
+  if (value->type == SCHEME_LAMBDA) {
+    value->value.lambda.env = add_variable(value->value.lambda.env, symbol->value.symbol, value);
+  }
+
+  *env = add_variable(*env, symbol->value.symbol, value);
+  return symbol;
+}
+
+// Evalues a if special form
+static SchemeObject* eval_if(SchemeObject* args, Environment** env) {
+  if (args == NULL || args->type != SCHEME_PAIR || args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
+    printf("Error: malformed if expression.\n");
+    return NULL;
+  }
+
+  SchemeObject* condition = eval(args->value.pair.car, env);
+  if (condition == NULL) {
+    return NULL;
+  }
+
+  SchemeObject* then_branch = args->value.pair.cdr->value.pair.car;
+  SchemeObject* alt_branch = args->value.pair.cdr->value.pair.cdr;
+
+  // Makes if a special form since only one branch evalued
+  if (is_truthy(condition)) {
+    return eval(then_branch, env);
+  }
+  else if (alt_branch != NULL && alt_branch->type == SCHEME_PAIR) {
+    return eval(alt_branch->value.pair.car, env);
+  }
+
+  return make_nil();
+}
+
+// Evaluates a lambda special form
+static SchemeObject* eval_lambda(SchemeObject* args, Environment* env) {
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: malformed lambda expression.\n");
+    return NULL;
+  }
+  SchemeObject* params = args->value.pair.car;
+  SchemeObject* body = args->value.pair.cdr;
+  return make_lambda(params, body, env);
+}
+
+// Transforms a cond special form to nested ifs
+static SchemeObject* cond_to_if(SchemeObject* clauses) {
+  if (clauses == NULL || clauses->type == SCHEME_NIL) {
+    return make_nil();
+  }
+
+  SchemeObject* predicate = clauses->value.pair.car->value.pair.car;
+  SchemeObject* actions = clauses->value.pair.car->value.pair.cdr;
+  SchemeObject* rest = clauses->value.pair.cdr; // For recursive transforming
+  SchemeObject* consequence;
+
+  if (actions->value.pair.cdr != NULL && actions->value.pair.cdr->type != SCHEME_NIL) {
+    consequence = make_pair(make_symbol("begin"), actions);
+  }
+  else {
+    consequence = actions->value.pair.car;
+  }
+
+  // Else clause
+  if (predicate->type == SCHEME_SYMBOL && strcmp(predicate->value.symbol, "else") == 0) {
+    return consequence;
+  }
+
+  // Forms the if expression
+  return make_pair(make_symbol("if"), make_pair(predicate, make_pair(consequence, make_pair(cond_to_if(rest), make_nil()))));
+}
+
+// Evaluates a cond special form
+static SchemeObject* eval_cond(SchemeObject* clauses, Environment** env) {
+  return eval(cond_to_if(clauses), env);
+}
+
+// Transforms a let special form to nested lambdas
+static SchemeObject* let_to_combination(SchemeObject* args) {
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: malformed let expression.\n");
+    return NULL;
+  }
+
+  SchemeObject* bindings = args->value.pair.car;
+  SchemeObject* body = args->value.pair.cdr;
+
+  SchemeObject* vars_head = make_nil();
+  SchemeObject** vars_tail = &vars_head;
+
+  SchemeObject* vals_head = make_nil();
+  SchemeObject** vals_tail = &vals_head;
+
+  while (bindings != NULL && bindings->type == SCHEME_PAIR) {
+    SchemeObject* binding = bindings->value.pair.car;
+    if (binding == NULL || binding->type != SCHEME_PAIR || binding->value.pair.cdr == NULL || binding->value.pair.cdr->type != SCHEME_PAIR) {
+      printf("Error: malformed binding in let.\n");
+      return NULL;
+    }
+
+    SchemeObject* var = binding->value.pair.car;
+    SchemeObject* val = binding->value.pair.cdr->value.pair.car;
+
+    *vars_tail = make_pair(var, make_nil());
+    vars_tail = &((*vars_tail)->value.pair.cdr);
+
+    *vals_tail = make_pair(val, make_nil());
+    vals_tail = &((*vals_tail)->value.pair.cdr);
+
+    bindings = bindings->value.pair.cdr;
+  }
+
+  SchemeObject* lambda_expr = make_pair(make_symbol("lambda"), make_pair(vars_head, body));
+
+  return make_pair(lambda_expr, vals_head);
+}
+
+// Evaluates a let special form
+static SchemeObject* eval_let(SchemeObject* args, Environment** env) {
+  SchemeObject* lambda_call = let_to_combination(args);
+  if (lambda_call == NULL) {
+    return NULL;
+  }
+  return eval(lambda_call, env);
+}
+
+// Evaluates a list of expressions in order and returns the return of the last expression
+static SchemeObject* eval_sequence(SchemeObject* exps, Environment** env) {
+  if (exps == NULL || exps->type == SCHEME_NIL) {
+    return make_nil();
+  }
+
+  SchemeObject* result = NULL;
+  while (exps != NULL && exps->type == SCHEME_PAIR) {
+    result = eval(exps->value.pair.car, env);
+    if (result == NULL) {
+      return NULL;
+    }
+    exps = exps->value.pair.cdr;
+  }
+  return result;
+}
+
+// Maps eval to a list of arguments in respect to an environment
+static SchemeObject* map_eval(SchemeObject* args, Environment** env) {
+
+  // If args are null, return the empty list
+  if (args == NULL || args->type == SCHEME_NIL) {
+    return make_nil();
+  }
+
+  // Evaluates the head of the args
+  SchemeObject* evaluated_arg = eval(args->value.pair.car, env);
+  if (evaluated_arg == NULL) {
+    return NULL;
+  }
+
+  // Recursive call to evaluate the tail of the args
+  SchemeObject* rest_evaluated = map_eval(args->value.pair.cdr, env);
+  if (rest_evaluated == NULL) {
+    return NULL;
+  }
+
+  // Returns the list of evalued args
+  return make_pair(evaluated_arg, rest_evaluated);
+}
 
 // Evaluates a given expression in respect to an environment
 SchemeObject* eval(SchemeObject* expr, Environment** env) {
@@ -25,82 +243,24 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
     case SCHEME_LAMBDA:
       return expr;
 
-    case SCHEME_SYMBOL: {
-      SchemeObject* value = lookup_variable(expr->value.symbol, *env);
-      if (value == NULL) {
-        printf("Error: undefined variable '%s'.\n", expr->value.symbol);
-      }
-      return value;
-    }
+    case SCHEME_SYMBOL:
+      return eval_symbol(expr, *env);
 
     case SCHEME_PAIR: {
       SchemeObject* head = expr->value.pair.car;
-      int is_symbol = (head != NULL && head->type == SCHEME_SYMBOL);
+      SchemeObject* args = expr->value.pair.cdr;
 
-      // quote
-      if (is_symbol && strcmp(head->value.symbol, "quote") == 0) {
-        SchemeObject* args = expr->value.pair.cdr;
-        if (args == NULL || args->type != SCHEME_PAIR) {
-          printf("Error: quote operates on a single argument.\n");
-          return NULL;
-        }
-        return args->value.pair.car;
-      }
+      // If its head is a symbol, dispatch the special forms
+      if (head != NULL && head->type == SCHEME_SYMBOL) {
+        const char* name = head->value.symbol;
 
-      // define
-      if (is_symbol && strcmp(head->value.symbol, "define") == 0) {
-        SchemeObject* symbol = expr->value.pair.cdr->value.pair.car;
-        SchemeObject* value = eval(expr->value.pair.cdr->value.pair.cdr->value.pair.car, env);
-
-        if (value == NULL) {
-          return NULL;
-        }
-
-        if (value->type == SCHEME_LAMBDA) {
-          value->value.lambda.env = add_variable(value->value.lambda.env, symbol->value.symbol, value);
-        }
-
-        if (lookup_variable(symbol->value.symbol, *env) != NULL) {
-          printf("Error: variable '%s' already defined.\n", symbol->value.symbol);
-          return NULL;
-        }
-
-        *env = add_variable(*env, symbol->value.symbol, value);
-        // printf("Variable '%s' defined in the global environment.\n", symbol->value.symbol);
-        return symbol;
-      }
-
-      // lambda
-      if (is_symbol && strcmp(head->value.symbol, "lambda") == 0) {
-        SchemeObject* params = expr->value.pair.cdr->value.pair.car;
-        SchemeObject* body = expr->value.pair.cdr->value.pair.cdr;
-        return make_lambda(params, body, *env);
-      }
-
-      // if
-      if (is_symbol && strcmp(head->value.symbol, "if") == 0) {
-        SchemeObject* condition = eval(expr->value.pair.cdr->value.pair.car, env);
-        if (condition == NULL) {
-          return NULL;
-        }
-
-        int is_false = (condition->type == SCHEME_BOOLEAN && condition->value.boolean == 0);
-
-        if (!is_false) {
-          return eval(expr->value.pair.cdr->value.pair.cdr->value.pair.car, env);
-        }
-
-        else {
-          SchemeObject* alt = expr->value.pair.cdr->value.pair.cdr->value.pair.cdr;
-
-          if (alt != NULL && alt->type == SCHEME_PAIR) {
-            return eval(alt->value.pair.car, env);
-          }
-
-          else {
-            return make_nil();
-          }
-        }
+        if (strcmp(name, "quote")  == 0) return eval_quote(args);
+        if (strcmp(name, "define") == 0) return eval_define(args, env);
+        if (strcmp(name, "if")     == 0) return eval_if(args, env);
+        if (strcmp(name, "lambda") == 0) return eval_lambda(args, *env);
+        if (strcmp(name, "begin")  == 0) return eval_sequence(args, env);
+        if (strcmp(name, "cond")   == 0) return eval_cond(args, env);
+        if (strcmp(name, "let")    == 0) return eval_let(args, env);
       }
 
       // Primitive or Lambda
@@ -110,13 +270,13 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
       }
 
       if (proc->type == SCHEME_PRIMITIVE || proc->type == SCHEME_LAMBDA) {
-        SchemeObject* args = map_eval(expr->value.pair.cdr, env);
+        SchemeObject* evaled_args = map_eval(args, env);
 
-        if (args == NULL && expr->value.pair.cdr != NULL && expr->value.pair.cdr->type != SCHEME_NIL) {
+        if (evaled_args == NULL && expr->value.pair.cdr != NULL && expr->value.pair.cdr->type != SCHEME_NIL) {
           return NULL;
         }
 
-        return apply(proc, args);
+        return apply(proc, evaled_args);
       }
 
       printf("Error: variable is not a procedure.\n");
@@ -124,25 +284,9 @@ SchemeObject* eval(SchemeObject* expr, Environment** env) {
     }
 
     default:
+      printf("Error: unexpected case of eval.\n");
       return NULL;
   }
-}
-
-// Evaluates a list of expressions in order and returns the return of the last expression
-SchemeObject* eval_sequence(SchemeObject* exps, Environment** env) {
-  if (exps == NULL || exps->type == SCHEME_NIL) {
-    return make_nil();
-  }
-
-  SchemeObject* result = NULL;
-  while (exps != NULL && exps->type == SCHEME_PAIR) {
-    result = eval(exps->value.pair.car, env);
-    if (result == NULL) {
-      return NULL;
-    }
-    exps = exps->value.pair.cdr;
-  }
-  return result;
 }
 
 // Applies a given function to a list of arguments
@@ -188,28 +332,4 @@ SchemeObject* apply(SchemeObject* func, SchemeObject* args) {
     printf("Error: the procedure being applied is neither a primitive nor a lambda.\n");
   }
   return NULL;
-}
-
-// Maps eval to a list of arguments in respect to an environment
-SchemeObject* map_eval(SchemeObject* args, Environment** env) {
-
-  // If args are null, return the empty list
-  if (args == NULL || args->type == SCHEME_NIL) {
-    return make_nil();
-  }
-
-  // Evaluates the head of the args
-  SchemeObject* evaluated_arg = eval(args->value.pair.car, env);
-  if (evaluated_arg == NULL) {
-    return NULL;
-  }
-
-  // Recursive call to evaluate the tail of the args
-  SchemeObject* rest_evaluated = map_eval(args->value.pair.cdr, env);
-  if (rest_evaluated == NULL) {
-    return NULL;
-  }
-
-  // Returns the list of evalued args
-  return make_pair(evaluated_arg, rest_evaluated);
 }
