@@ -53,19 +53,41 @@ static SchemeObject* eval_define(SchemeObject* args, Environment** env) {
     return NULL;
   }
 
-  if (args->value.pair.cdr->value.pair.cdr != NULL &&
-      args->value.pair.cdr->value.pair.cdr->type != SCHEME_NIL) {
-    printf("Error: define takes exactly 2 arguments.\n");
+  SchemeObject* first = args->value.pair.car;
+  SchemeObject* symbol = NULL;
+  SchemeObject* value = NULL;
+
+  // Abbreviated form
+  if (first != NULL && first->type == SCHEME_PAIR) {
+    symbol = first->value.pair.car;
+    if (symbol == NULL || symbol->type != SCHEME_SYMBOL) {
+      printf("Error: function name in define must be a symbol.\n");
+      return NULL;
+    }
+
+    SchemeObject* params = first->value.pair.cdr;
+    SchemeObject* body = args->value.pair.cdr;
+    SchemeObject* lambda_args = make_pair(params, body);
+
+    value = eval_lambda(lambda_args, *env);
+    free(lambda_args);
+  }
+  // Standard form
+  else if (first != NULL && first->type == SCHEME_SYMBOL) {
+    if (args->value.pair.cdr->value.pair.cdr != NULL &&
+        args->value.pair.cdr->value.pair.cdr->type != SCHEME_NIL) {
+      printf("Error: define takes exactly 2 arguments.\n");
+      return NULL;
+    }
+
+    symbol = first;
+    value = eval(args->value.pair.cdr->value.pair.car, env);
+  }
+  else {
+    printf("Error: define expects a symbol or function signature.\n");
     return NULL;
   }
 
-  SchemeObject* symbol = args->value.pair.car;
-  if (symbol == NULL || symbol->type != SCHEME_SYMBOL) {
-    printf("Error: define expects a symbol as first argument.\n");
-    return NULL;
-  }
-
-  SchemeObject* value = eval(args->value.pair.cdr->value.pair.car, env);
   if (value == NULL) {
     return NULL;
   }
