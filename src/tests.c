@@ -279,6 +279,28 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
       "(begin (define (fat n) (define zero 0) (if (<= n zero) 1 (* n (fat (- n 1))))) (fat 5))",
       "120"
     },
+
+    // equal?
+    {
+      "equal? on identical lists",
+      "(equal? '(1 (2 3)) (list 1 (list 2 3)))",
+      "#t"
+    },
+    {
+      "equal? on different lists",
+      "(equal? '(1 2) '(1 3))",
+      "#f"
+    },
+    {
+      "equal? on strings",
+      "(equal? \"jvlisp\" \"jvlisp\")",
+      "#t"
+    },
+    {
+      "equal? on symbols",
+      "(equal? 'abc 'abc)",
+      "#t"
+    },
   };
 
   int total = sizeof(tests) / sizeof(TestCase);

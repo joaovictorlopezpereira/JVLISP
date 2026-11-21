@@ -7,6 +7,7 @@
 #include "types.h"
 
 // Functions Signatures
+int are_objects_equal(SchemeObject* a, SchemeObject* b);
 SchemeObject* make_number(double number);
 SchemeObject* make_symbol(const char* symbol);
 SchemeObject* make_string(const char* string);
@@ -22,6 +23,46 @@ void print_scheme_object(SchemeObject* object);
 static SchemeObject nil_singleton   = { .type = SCHEME_NIL };
 static SchemeObject true_singleton  = { .type = SCHEME_BOOLEAN, .value.boolean = 1 };
 static SchemeObject false_singleton = { .type = SCHEME_BOOLEAN, .value.boolean = 0 };
+
+// Auxiliar function that compares structural equality between scheme objects
+int are_objects_equal(SchemeObject* a, SchemeObject* b) {
+  if (a == b) {
+    return 1;
+  }
+
+  if (a == NULL || b == NULL) {
+    return 0;
+  }
+
+  if (a->type != b->type) {
+    return 0;
+  }
+
+  switch (a->type) {
+    case SCHEME_NUMBER:
+      return a->value.number == b->value.number;
+
+    case SCHEME_BOOLEAN:
+      return a->value.boolean == b->value.boolean;
+
+    case SCHEME_SYMBOL:
+      return strcmp(a->value.symbol, b->value.symbol) == 0;
+
+    case SCHEME_STRING:
+      return strcmp(a->value.string, b->value.string) == 0;
+
+    case SCHEME_NIL:
+      return 1;
+
+    case SCHEME_PAIR:
+      return are_objects_equal(a->value.pair.car, b->value.pair.car) &&
+             are_objects_equal(a->value.pair.cdr, b->value.pair.cdr);
+
+    default:
+      return 0;
+  }
+}
+
 
 // Creates a Scheme number
 SchemeObject* make_number(double number) {

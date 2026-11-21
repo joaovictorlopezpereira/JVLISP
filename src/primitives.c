@@ -6,11 +6,13 @@
 
 // Functions Signatures
 static int check_unary_args(SchemeObject* args, const char* name);
+static int check_binary_args(SchemeObject* args, const char* name);
 SchemeObject* primitive_add(SchemeObject* args);
 SchemeObject* primitive_sub(SchemeObject* args);
 SchemeObject* primitive_mul(SchemeObject* args);
 SchemeObject* primitive_div(SchemeObject* args);
 SchemeObject* primitive_equal_sign(SchemeObject* args);
+SchemeObject* primitive_equal(SchemeObject* args);
 SchemeObject* primitive_cons(SchemeObject* args);
 SchemeObject* primitive_list(SchemeObject* args);
 SchemeObject* primitive_car(SchemeObject* args);
@@ -33,6 +35,7 @@ PrimitiveMapping primitives[] = {
   {"*", primitive_mul},
   {"/", primitive_div},
   {"=", primitive_equal_sign},
+  {"equal?", primitive_equal},
   {"cons", primitive_cons},
   {"list", primitive_list},
   {"car", primitive_car},
@@ -49,14 +52,30 @@ PrimitiveMapping primitives[] = {
   {">=", primitive_gte}
 };
 
-// Checks if the argument is unary
+// Helper to validate unary primitives
 static int check_unary_args(SchemeObject* args, const char* name) {
   if (args == NULL || args->type != SCHEME_PAIR) {
     printf("Error: %s requires 1 argument.\n", name);
     return 0;
   }
-  if (args->value.pair.cdr != NULL && args->value.pair.cdr->type != SCHEME_NIL) {
+  if (args->value.pair.cdr != NULL &&
+      args->value.pair.cdr->type != SCHEME_NIL) {
     printf("Error: %s takes exactly 1 argument.\n", name);
+    return 0;
+  }
+  return 1;
+}
+
+// Helper to validate binary primitives
+static int check_binary_args(SchemeObject* args, const char* name) {
+  if (args == NULL || args->type != SCHEME_PAIR ||
+      args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
+    printf("Error: %s requires 2 arguments.\n", name);
+    return 0;
+  }
+  if (args->value.pair.cdr->value.pair.cdr != NULL &&
+      args->value.pair.cdr->value.pair.cdr->type != SCHEME_NIL) {
+    printf("Error: %s takes exactly 2 arguments.\n", name);
     return 0;
   }
   return 1;
@@ -204,6 +223,18 @@ SchemeObject* primitive_equal_sign(SchemeObject* args) {
   }
 
   return make_boolean("#t");
+}
+
+// Scheme "equal?" procedure
+SchemeObject* primitive_equal(SchemeObject* args) {
+  if (!check_binary_args(args, "equal?")) {
+    return NULL;
+  }
+
+  SchemeObject* first = args->value.pair.car;
+  SchemeObject* second = args->value.pair.cdr->value.pair.car;
+
+  return make_boolean(are_objects_equal(first, second) ? "#t" : "#f");
 }
 
 // Scheme "cons" procedure
