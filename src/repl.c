@@ -5,6 +5,8 @@
 
 // Functions Signatures
 void REPL();
+static char* read_file(const char* filename);
+void run_file(const char* filename);
 
 // Does the READ, EVAL, PRINT, LOOP cycle
 void REPL() {
@@ -78,4 +80,71 @@ void REPL() {
   free_environment(global_environment);
 
   printf("Thanks for using JVLISP! :)\n");
+}
+
+// Reads a file and return a dynamically allocated string
+static char* read_file(const char* filename) {
+  FILE* file = fopen(filename, "rb");
+  if (file == NULL) {
+    printf("Error: could not open file '%s'.\n", filename);
+    return NULL;
+  }
+
+  fseek(file, 0, SEEK_END);
+  long length = ftell(file);
+  rewind(file);
+
+  char* buffer = (char*)malloc(length + 1);
+  if (buffer == NULL) {
+    printf("Error: out of memory reading '%s'.\n", filename);
+    fclose(file);
+    return NULL;
+  }
+
+  size_t bytes_read = fread(buffer, 1, length, file);
+  buffer[bytes_read] = '\0';
+  fclose(file);
+  return buffer;
+}
+
+// Execute expressions in a .jlp file sequentially
+void run_file(const char* filename) {
+  const char* ext = strrchr(filename, '.');
+  if (ext == NULL || strcmp(ext, ".jlp") != 0) {
+    printf("Error: expected a .jlp file.\n");
+    exit(1);
+  }
+
+  char* source = read_file(filename);
+  if (source == NULL) {
+    exit(1);
+  }
+
+  Token* tokens = tokenize(source);
+  free(source);
+  if (tokens == NULL) {
+    exit(1);
+  }
+
+  Token* original_tokens = tokens;
+  Environment* global_environment = init_environment();
+
+  while (tokens->type != TOKEN_EOF) {
+    SchemeObject* expr = parser(&tokens);
+    if (expr == NULL) {
+      free_tokens(original_tokens);
+      free_environment(global_environment);
+      exit(1);
+    }
+
+    SchemeObject* result = eval(expr, &global_environment);
+    if (result == NULL) {
+      free_tokens(original_tokens);
+      free_environment(global_environment);
+      exit(1);
+    }
+  }
+
+  free_tokens(original_tokens);
+  free_environment(global_environment);
 }
