@@ -151,6 +151,10 @@ SchemeObject* primitive_div(SchemeObject* args) {
 
   // Treats the case where there's only one input to the / operator
   if (args == NULL || args->type == SCHEME_NIL) {
+    if (acc == 0.0) {
+      printf("Error: division by zero.\n");
+      return NULL;
+    }
     return make_number(1.0 / acc);
   }
 
@@ -159,7 +163,12 @@ SchemeObject* primitive_div(SchemeObject* args) {
       printf("Error: / only operates on numbers.\n");
       return NULL;
     }
-    acc /= args->value.pair.car->value.number; // Accumulates the division
+    double divisor = args->value.pair.car->value.number;
+    if (divisor == 0.0) {
+      printf("Error: division by zero.\n");
+      return NULL;
+    }
+    acc /= divisor; // Accumulates the division
     args = args->value.pair.cdr;
   }
 
