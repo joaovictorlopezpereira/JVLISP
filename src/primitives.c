@@ -12,6 +12,7 @@ SchemeObject* primitive_mul(SchemeObject* args);
 SchemeObject* primitive_div(SchemeObject* args);
 SchemeObject* primitive_equal_sign(SchemeObject* args);
 SchemeObject* primitive_cons(SchemeObject* args);
+SchemeObject* primitive_list(SchemeObject* args);
 SchemeObject* primitive_car(SchemeObject* args);
 SchemeObject* primitive_cdr(SchemeObject* args);
 SchemeObject* primitive_is_null(SchemeObject* args);
@@ -33,6 +34,7 @@ PrimitiveMapping primitives[] = {
   {"/", primitive_div},
   {"=", primitive_equal_sign},
   {"cons", primitive_cons},
+  {"list", primitive_list},
   {"car", primitive_car},
   {"cdr", primitive_cdr},
   {"null?", primitive_is_null},
@@ -223,6 +225,14 @@ SchemeObject* primitive_cons(SchemeObject* args) {
   }
 
   return make_pair(args->value.pair.car, args->value.pair.cdr->value.pair.car);
+}
+
+// Scheme's list procedure
+SchemeObject* primitive_list(SchemeObject* args) {
+  if (args == NULL) {
+    return make_nil();
+  }
+  return args;
 }
 
 // Scheme "car" procedure

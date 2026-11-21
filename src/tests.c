@@ -245,6 +245,23 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
       "''x",
       "(quote (quote x))"
     },
+
+    // List
+    {
+      "list with no arguments",
+      "(list)",
+      "'()"
+    },
+    {
+      "list with evaluated arguments",
+      "(list 1 (+ 1 1) 3)",
+      "'(1 2 3)"
+    },
+    {
+      "nested list calls",
+      "(list (list 1 2) 'a)",
+      "'((1 2) a)"
+    },
   };
 
   int total = sizeof(tests) / sizeof(TestCase);
