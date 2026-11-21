@@ -1,8 +1,14 @@
 #pragma once
 
+// Includes
 #include <stdio.h>
 #include <string.h>
 #include "types.h"
+
+// Functions Signatures
+int are_objects_equal(SchemeObject* a, SchemeObject* b);
+static SchemeObject* eval_string(const char* code, Environment** env);
+SchemeObject* primitive_test_primitives(SchemeObject* args);
 
 // Auxiliar function that compares structural equality between scheme objects
 int are_objects_equal(SchemeObject* a, SchemeObject* b) {
