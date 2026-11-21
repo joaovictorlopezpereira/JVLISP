@@ -37,8 +37,9 @@ static SchemeObject* eval_symbol(SchemeObject* expr, Environment* env) {
 
 // Evaluates a quote special form
 static SchemeObject* eval_quote(SchemeObject* args) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: quote operates on a single argument.\n");
+  if (args == NULL || args->type != SCHEME_PAIR ||
+      (args->value.pair.cdr != NULL && args->value.pair.cdr->type != SCHEME_NIL)) {
+    printf("Error: quote takes exactly 1 argument.\n");
     return NULL;
   }
   return args->value.pair.car;
@@ -46,14 +47,25 @@ static SchemeObject* eval_quote(SchemeObject* args) {
 
 // Evaluates a define special form
 static SchemeObject* eval_define(SchemeObject* args, Environment** env) {
-  if (args == NULL || args->type != SCHEME_PAIR || args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
+  if (args == NULL || args->type != SCHEME_PAIR ||
+      args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
     printf("Error: malformed define.\n");
     return NULL;
   }
 
-  SchemeObject* symbol = args->value.pair.car;
-  SchemeObject* value = eval(args->value.pair.cdr->value.pair.car, env);
+  if (args->value.pair.cdr->value.pair.cdr != NULL &&
+      args->value.pair.cdr->value.pair.cdr->type != SCHEME_NIL) {
+    printf("Error: define takes exactly 2 arguments.\n");
+    return NULL;
+  }
 
+  SchemeObject* symbol = args->value.pair.car;
+  if (symbol == NULL || symbol->type != SCHEME_SYMBOL) {
+    printf("Error: define expects a symbol as first argument.\n");
+    return NULL;
+  }
+
+  SchemeObject* value = eval(args->value.pair.cdr->value.pair.car, env);
   if (value == NULL) {
     return NULL;
   }
@@ -68,9 +80,21 @@ static SchemeObject* eval_define(SchemeObject* args, Environment** env) {
 
 // Evalues a if special form
 static SchemeObject* eval_if(SchemeObject* args, Environment** env) {
-  if (args == NULL || args->type != SCHEME_PAIR || args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
+  if (args == NULL || args->type != SCHEME_PAIR ||
+      args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
     printf("Error: malformed if expression.\n");
     return NULL;
+  }
+
+  SchemeObject* then_branch = args->value.pair.cdr->value.pair.car;
+  SchemeObject* alt_branch = args->value.pair.cdr->value.pair.cdr;
+
+  if (alt_branch != NULL && alt_branch->type != SCHEME_NIL) {
+    if (alt_branch->type != SCHEME_PAIR ||
+        (alt_branch->value.pair.cdr != NULL && alt_branch->value.pair.cdr->type != SCHEME_NIL)) {
+      printf("Error: malformed if expression (too many arguments).\n");
+      return NULL;
+    }
   }
 
   SchemeObject* condition = eval(args->value.pair.car, env);
@@ -78,10 +102,7 @@ static SchemeObject* eval_if(SchemeObject* args, Environment** env) {
     return NULL;
   }
 
-  SchemeObject* then_branch = args->value.pair.cdr->value.pair.car;
-  SchemeObject* alt_branch = args->value.pair.cdr->value.pair.cdr;
-
-  // Makes if a special form since only one branch evalued
+  // Only evals the branch the if expression will return
   if (is_truthy(condition)) {
     return eval(then_branch, env);
   }
@@ -94,11 +115,26 @@ static SchemeObject* eval_if(SchemeObject* args, Environment** env) {
 
 // Evaluates a lambda special form
 static SchemeObject* eval_lambda(SchemeObject* args, Environment* env) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
+  if (args == NULL || args->type != SCHEME_PAIR ||
+      args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
     printf("Error: malformed lambda expression.\n");
     return NULL;
   }
+
   SchemeObject* params = args->value.pair.car;
+  SchemeObject* curr = params;
+  while (curr != NULL && curr->type == SCHEME_PAIR) {
+    if (curr->value.pair.car == NULL || curr->value.pair.car->type != SCHEME_SYMBOL) {
+      printf("Error: lambda parameters must be symbols.\n");
+      return NULL;
+    }
+    curr = curr->value.pair.cdr;
+  }
+  if (curr != NULL && curr->type != SCHEME_NIL) {
+    printf("Error: malformed lambda parameter list.\n");
+    return NULL;
+  }
+
   SchemeObject* body = args->value.pair.cdr;
   return make_lambda(params, body, env);
 }
@@ -108,10 +144,21 @@ static SchemeObject* cond_to_if(SchemeObject* clauses) {
   if (clauses == NULL || clauses->type == SCHEME_NIL) {
     return make_nil();
   }
+  if (clauses->type != SCHEME_PAIR) {
+    printf("Error: malformed cond expression.\n");
+    return NULL;
+  }
 
-  SchemeObject* predicate = clauses->value.pair.car->value.pair.car;
-  SchemeObject* actions = clauses->value.pair.car->value.pair.cdr;
-  SchemeObject* rest = clauses->value.pair.cdr; // For recursive transforming
+  SchemeObject* clause = clauses->value.pair.car;
+  if (clause == NULL || clause->type != SCHEME_PAIR ||
+      clause->value.pair.cdr == NULL || clause->value.pair.cdr->type != SCHEME_PAIR) {
+    printf("Error: malformed cond clause.\n");
+    return NULL;
+  }
+
+  SchemeObject* predicate = clause->value.pair.car;
+  SchemeObject* actions = clause->value.pair.cdr;
+  SchemeObject* rest = clauses->value.pair.cdr;
   SchemeObject* consequence;
 
   if (actions->value.pair.cdr != NULL && actions->value.pair.cdr->type != SCHEME_NIL) {
@@ -121,23 +168,35 @@ static SchemeObject* cond_to_if(SchemeObject* clauses) {
     consequence = actions->value.pair.car;
   }
 
-  // Else clause
-  if (predicate->type == SCHEME_SYMBOL && strcmp(predicate->value.symbol, "else") == 0) {
+  if (predicate != NULL && predicate->type == SCHEME_SYMBOL && strcmp(predicate->value.symbol, "else") == 0) {
+    if (rest != NULL && rest->type != SCHEME_NIL) {
+      printf("Error: else clause must be last in cond.\n");
+      return NULL;
+    }
     return consequence;
   }
 
-  // Forms the if expression
-  return make_pair(make_symbol("if"), make_pair(predicate, make_pair(consequence, make_pair(cond_to_if(rest), make_nil()))));
+  SchemeObject* alt = cond_to_if(rest);
+  if (alt == NULL) {
+    return NULL;
+  }
+
+  return make_pair(make_symbol("if"), make_pair(predicate, make_pair(consequence, make_pair(alt, make_nil()))));
 }
 
 // Evaluates a cond special form
 static SchemeObject* eval_cond(SchemeObject* clauses, Environment** env) {
-  return eval(cond_to_if(clauses), env);
+  SchemeObject* expanded = cond_to_if(clauses);
+  if (expanded == NULL) {
+    return NULL;
+  }
+  return eval(expanded, env);
 }
 
 // Transforms a let special form to nested lambdas
 static SchemeObject* let_to_combination(SchemeObject* args) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
+  if (args == NULL || args->type != SCHEME_PAIR ||
+      args->value.pair.cdr == NULL || args->value.pair.cdr->type != SCHEME_PAIR) {
     printf("Error: malformed let expression.\n");
     return NULL;
   }
@@ -153,12 +212,20 @@ static SchemeObject* let_to_combination(SchemeObject* args) {
 
   while (bindings != NULL && bindings->type == SCHEME_PAIR) {
     SchemeObject* binding = bindings->value.pair.car;
-    if (binding == NULL || binding->type != SCHEME_PAIR || binding->value.pair.cdr == NULL || binding->value.pair.cdr->type != SCHEME_PAIR) {
+    if (binding == NULL || binding->type != SCHEME_PAIR ||
+        binding->value.pair.cdr == NULL || binding->value.pair.cdr->type != SCHEME_PAIR ||
+        (binding->value.pair.cdr->value.pair.cdr != NULL &&
+         binding->value.pair.cdr->value.pair.cdr->type != SCHEME_NIL)) {
       printf("Error: malformed binding in let.\n");
       return NULL;
     }
 
     SchemeObject* var = binding->value.pair.car;
+    if (var == NULL || var->type != SCHEME_SYMBOL) {
+      printf("Error: let binding variable must be a symbol.\n");
+      return NULL;
+    }
+
     SchemeObject* val = binding->value.pair.cdr->value.pair.car;
 
     *vars_tail = make_pair(var, make_nil());
@@ -170,8 +237,12 @@ static SchemeObject* let_to_combination(SchemeObject* args) {
     bindings = bindings->value.pair.cdr;
   }
 
-  SchemeObject* lambda_expr = make_pair(make_symbol("lambda"), make_pair(vars_head, body));
+  if (bindings != NULL && bindings->type != SCHEME_NIL) {
+    printf("Error: malformed bindings list in let.\n");
+    return NULL;
+  }
 
+  SchemeObject* lambda_expr = make_pair(make_symbol("lambda"), make_pair(vars_head, body));
   return make_pair(lambda_expr, vals_head);
 }
 
