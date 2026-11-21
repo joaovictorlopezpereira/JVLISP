@@ -3,14 +3,14 @@
 #include "primitives.c"
 
 // Functions Signatures
-SchemeObject* lookup_variable(char* name, Environment* env);
-Environment* add_variable(Environment* env, char* name, SchemeObject* value);
+SchemeObject* lookup_variable(const char* name, Environment* env);
+Environment* add_variable(Environment* env, const char* name, SchemeObject* value);
 static Environment* init_environment();
 Environment* extend_environment(SchemeObject* params, SchemeObject* args, Environment* env);
 void free_environment(Environment* env);
 
 // Looks up the value of a variable in the environment
-SchemeObject* lookup_variable(char* name, Environment* env) {
+SchemeObject* lookup_variable(const char* name, Environment* env) {
   while (env != NULL) {
     if (strcmp(env->name, name) == 0) {
       return env->value;
@@ -21,7 +21,7 @@ SchemeObject* lookup_variable(char* name, Environment* env) {
 }
 
 // Inserts a new frame to the environment
-Environment* add_variable(Environment* env, char* name, SchemeObject* value) {
+Environment* add_variable(Environment* env, const char* name, SchemeObject* value) {
   Environment* new_env = (Environment*)malloc(sizeof(Environment));
   new_env->name = strdup(name);
   new_env->value = value;
@@ -32,26 +32,15 @@ Environment* add_variable(Environment* env, char* name, SchemeObject* value) {
 // Initializes the environment
 static Environment* init_environment() {
   Environment* env = NULL;
+  size_t num_primitives = sizeof(primitives) / sizeof(primitives[0]);
 
-  // Adds the primitive functions to the environment
-  env = add_variable(env, "+", make_primitive(primitive_add, "+"));
-  env = add_variable(env, "-", make_primitive(primitive_sub, "-"));
-  env = add_variable(env, "*", make_primitive(primitive_mul, "*"));
-  env = add_variable(env, "/", make_primitive(primitive_div, "/"));
-  env = add_variable(env, "=", make_primitive(primitive_equal_sign, "="));
-  env = add_variable(env, "cons", make_primitive(primitive_cons, "cons"));
-  env = add_variable(env, "car", make_primitive(primitive_car, "car"));
-  env = add_variable(env, "cdr", make_primitive(primitive_cdr, "cdr"));
-  env = add_variable(env, "null?", make_primitive(primitive_is_null, "null?"));
-  env = add_variable(env, "display", make_primitive(primitive_display, "display"));
-  env = add_variable(env, "pair?", make_primitive(primitive_is_pair, "pair?"));
-  env = add_variable(env, "number?", make_primitive(primitive_is_number, "number?"));
-  env = add_variable(env, "symbol?", make_primitive(primitive_is_symbol, "symbol?"));
-  env = add_variable(env, "boolean?", make_primitive(primitive_is_boolean, "boolean?"));
-  env = add_variable(env, "<",  make_primitive(primitive_lt, "<"));
-  env = add_variable(env, ">",  make_primitive(primitive_gt, ">"));
-  env = add_variable(env, "<=", make_primitive(primitive_lte, "<="));
-  env = add_variable(env, ">=", make_primitive(primitive_gte, ">="));
+  for (size_t i = 0; i < num_primitives; i++) {
+    env = add_variable(
+      env,
+      primitives[i].symbol,
+      make_primitive(primitives[i].function, primitives[i].symbol)
+    );
+  }
 
   return env;
 }
