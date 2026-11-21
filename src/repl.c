@@ -48,6 +48,11 @@ void REPL() {
 
     // Tokenizing
     Token* tokens = tokenize(input);
+
+    if (tokens == NULL) {
+      continue;
+    }
+
     Token* original_tokens = tokens;
 
     // Parsing

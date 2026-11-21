@@ -43,6 +43,11 @@ int are_objects_equal(SchemeObject* a, SchemeObject* b) {
 // Evals a string of Scheme code in a given environment
 static SchemeObject* eval_string(const char* code, Environment** env) {
   Token* tokens = tokenize(code);
+
+  if (tokens == NULL) {
+    return NULL;
+  }
+
   Token* original = tokens;
   SchemeObject* expr = parser(&tokens);
   SchemeObject* result = eval(expr, env);

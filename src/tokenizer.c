@@ -106,6 +106,9 @@ Token* tokenize(const char* input) {
       }
       else {
         printf("Error: string not closed.\n");
+        tokens[token_count] = (Token){TOKEN_EOF, NULL};
+        free_tokens(tokens);
+        return NULL;
       }
     }
 
