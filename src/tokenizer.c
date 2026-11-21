@@ -64,10 +64,10 @@ Token* tokenize(const char* input) {
       current += 2;
     }
 
-    // Scheme's nil
-    else if (strncmp(current, "'()", 3) == 0) {
-      tokens[token_count++] = (Token){TOKEN_NIL, strdup("'()")};
-      current += 3;
+    // Scheme's quote
+    else if (*current == '\'') {
+      tokens[token_count++] = (Token){TOKEN_QUOTE, strdup("'")};
+      current++;
     }
 
     // Scheme's number
@@ -115,7 +115,7 @@ Token* tokenize(const char* input) {
     // Else, the token is a Scheme symbol
     else {
       const char* start = current;
-      while (!isspace(*current) && *current != '(' && *current != ')' && *current != '\0') {
+      while (!isspace(*current) && *current != '(' && *current != ')' && *current != '\'' && *current != '\0') {
         current++;
       }
       char* symbol_str = (char*)malloc(current - start + 1);

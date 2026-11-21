@@ -228,6 +228,23 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
       "(cond ((= 1 1) (define a 10) (+ a 5)) (else 0))",
       "15"
     },
+
+    // Quote
+    {
+      "Quote shortcut on symbol",
+      "'x",
+      "(quote x)"
+    },
+    {
+      "Quote shortcut on list",
+      "(car '(10 20 30))",
+      "10"
+    },
+    {
+      "Nested quote shortcuts",
+      "''x",
+      "(quote (quote x))"
+    },
   };
 
   int total = sizeof(tests) / sizeof(TestCase);

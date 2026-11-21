@@ -59,11 +59,12 @@ typedef struct {
 typedef enum {
   TOKEN_LEFTPAREN,  // (
   TOKEN_RIGHTPAREN, // )
+  TOKEN_QUOTE,      // '
   TOKEN_BOOLEAN,    // #t #f
-  TOKEN_SYMBOL,     // Symbol name (e.g., "+", "x")
+  TOKEN_SYMBOL,     // Symbol (e.g., "+", "x")
   TOKEN_NUMBER,     // Number (e.g., "1", "42")
-  TOKEN_STRING,     // "hello", "world"
-  TOKEN_NIL,        // '() nil
+  TOKEN_STRING,     // String (e.g., "hello", "world")
+  TOKEN_NIL,        // '()
   TOKEN_EOF,        // End of input
 } TokenType;
 
