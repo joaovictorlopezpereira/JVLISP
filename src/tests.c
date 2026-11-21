@@ -262,6 +262,23 @@ SchemeObject* primitive_test_primitives(SchemeObject* args) {
       "(list (list 1 2) 'a)",
       "'((1 2) a)"
     },
+
+    // Abbreviated define
+    {
+      "Abbreviated define with 0 parameters",
+      "(begin (define (const-five) 5) (const-five))",
+      "5"
+    },
+    {
+      "Abbreviated define with multiple parameters",
+      "(begin (define (soma-quad a b) (+ (* a a) (* b b))) (soma-quad 3 4))",
+      "25"
+    },
+    {
+      "Abbreviated define supports recursion and multi-expression body",
+      "(begin (define (fat n) (define zero 0) (if (<= n zero) 1 (* n (fat (- n 1))))) (fat 5))",
+      "120"
+    },
   };
 
   int total = sizeof(tests) / sizeof(TestCase);
