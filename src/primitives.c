@@ -5,7 +5,7 @@
 #include "object.c"
 
 // Functions Signatures
-SchemeObject* (*get_primitive_function(const char* symbol))(SchemeObject* args);
+static int check_unary_args(SchemeObject* args, const char* name);
 SchemeObject* primitive_add(SchemeObject* args);
 SchemeObject* primitive_sub(SchemeObject* args);
 SchemeObject* primitive_mul(SchemeObject* args);
@@ -47,14 +47,17 @@ PrimitiveMapping primitives[] = {
   {">=", primitive_gte}
 };
 
-// Gets a primitive function given its "name"
-SchemeObject* (*get_primitive_function(const char* symbol))(SchemeObject* args) {
-  for (int i = 0; i < sizeof(primitives) / sizeof(PrimitiveMapping); i++) {
-    if (strcmp(symbol, primitives[i].symbol) == 0) {
-      return primitives[i].function;
-    }
+// Checks if the argument is unary
+static int check_unary_args(SchemeObject* args, const char* name) {
+  if (args == NULL || args->type != SCHEME_PAIR) {
+    printf("Error: %s requires 1 argument.\n", name);
+    return 0;
   }
-  return NULL;
+  if (args->value.pair.cdr != NULL && args->value.pair.cdr->type != SCHEME_NIL) {
+    printf("Error: %s takes exactly 1 argument.\n", name);
+    return 0;
+  }
+  return 1;
 }
 
 // Scheme "+" procedure
@@ -215,8 +218,7 @@ SchemeObject* primitive_cons(SchemeObject* args) {
 
 // Scheme "car" procedure
 SchemeObject* primitive_car(SchemeObject* args) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: car requires at least 1 arguments.\n");
+  if (!check_unary_args(args, "car")) {
     return NULL;
   }
 
@@ -230,8 +232,7 @@ SchemeObject* primitive_car(SchemeObject* args) {
 
 // Scheme "cdr" procedure
 SchemeObject* primitive_cdr(SchemeObject* args) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: cdr requires at least 1 arguments.\n");
+  if (!check_unary_args(args, "cdr")) {
     return NULL;
   }
 
@@ -245,22 +246,11 @@ SchemeObject* primitive_cdr(SchemeObject* args) {
 
 // Scheme "null?" procedure
 SchemeObject* primitive_is_null(SchemeObject* args) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: null? requires 1 argument.\n");
+  if (!check_unary_args(args, "null?")) {
     return NULL;
   }
 
-  if (args->value.pair.cdr != NULL && args->value.pair.cdr->type != SCHEME_NIL) {
-    printf("Error: null? takes exactly 1 argument.\n");
-    return NULL;
-  }
-
-  if (args->value.pair.car != NULL && args->value.pair.car->type == SCHEME_NIL) {
-    return make_boolean("#t");
-  }
-  else {
-    return make_boolean("#f");
-  }
+  return make_boolean(args->value.pair.car->type == SCHEME_NIL ? "#t" : "#f");
 }
 
 // Scheme "display" procedure
@@ -284,37 +274,37 @@ SchemeObject* primitive_display(SchemeObject* args) {
 
 // Scheme "pair?" procedure
 SchemeObject* primitive_is_pair(SchemeObject* args) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: pair? requires 1 argument.\n");
+  if (!check_unary_args(args, "pair?")){
     return NULL;
   }
+
   return make_boolean(args->value.pair.car->type == SCHEME_PAIR ? "#t" : "#f");
 }
 
 // Scheme "number?" procedure
 SchemeObject* primitive_is_number(SchemeObject* args) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: number? requires 1 argument.\n");
+  if (!check_unary_args(args, "number?")) {
     return NULL;
   }
+
   return make_boolean(args->value.pair.car->type == SCHEME_NUMBER ? "#t" : "#f");
 }
 
 // Scheme "symbol?" procedure
 SchemeObject* primitive_is_symbol(SchemeObject* args) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: symbol? requires 1 argument.\n");
+  if (!check_unary_args(args, "symbol?")) {
     return NULL;
   }
+
   return make_boolean(args->value.pair.car->type == SCHEME_SYMBOL ? "#t" : "#f");
 }
 
 // Scheme "boolean?" procedure
 SchemeObject* primitive_is_boolean(SchemeObject* args) {
-  if (args == NULL || args->type != SCHEME_PAIR) {
-    printf("Error: boolean? requires 1 argument.\n");
+  if (!check_unary_args(args, "boolean?")) {
     return NULL;
   }
+
   return make_boolean(args->value.pair.car->type == SCHEME_BOOLEAN ? "#t" : "#f");
 }
 
