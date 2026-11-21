@@ -18,6 +18,11 @@ SchemeObject* make_nil();
 void free_scheme_object(SchemeObject* object);
 void print_scheme_object(SchemeObject* object);
 
+// Immutable singletons
+static SchemeObject nil_singleton   = { .type = SCHEME_NIL };
+static SchemeObject true_singleton  = { .type = SCHEME_BOOLEAN, .value.boolean = 1 };
+static SchemeObject false_singleton = { .type = SCHEME_BOOLEAN, .value.boolean = 0 };
+
 // Creates a Scheme number
 SchemeObject* make_number(double number) {
   SchemeObject* object = (SchemeObject*)malloc(sizeof(SchemeObject));
@@ -70,52 +75,52 @@ SchemeObject* make_lambda(SchemeObject* params, SchemeObject* body, Environment*
   return object;
 }
 
-// Creates a Scheme boolean
+// Returns a reference to the singleton which represents a Scheme boolean
 SchemeObject* make_boolean(const char* string) {
-  SchemeObject* object = (SchemeObject*)malloc(sizeof(SchemeObject));
-  object->type = SCHEME_BOOLEAN;
   if (strcmp(string, "#t") == 0) {
-    object->value.boolean = 1;
+    return &true_singleton;
   }
-  else {
-    object->value.boolean = 0;
-  }
-  return object;
+  return &false_singleton;
 }
 
-// Creates a Scheme nil. A possibility is to make this object a singleton so that memory won't be allocated whenever nil is created
+// Returns a reference to the singleton which represents a Scheme nil
 SchemeObject* make_nil() {
-  SchemeObject* object = (SchemeObject*)malloc(sizeof(SchemeObject));
-  object->type = SCHEME_NIL;
-  return object;
+  return &nil_singleton;
 }
 
 // Frees the memory allocated by the SchemeObject
 void free_scheme_object(SchemeObject* object) {
-  if (object == NULL){
+  if (object == NULL ||
+      object == &nil_singleton ||
+      object == &true_singleton ||
+      object == &false_singleton) {
     return;
   }
   switch (object->type) {
     case SCHEME_SYMBOL:
       free(object->value.symbol);
       break;
+
     case SCHEME_STRING:
       free(object->value.string);
       break;
+
     case SCHEME_PRIMITIVE:
       free(object->value.primitive.symbol);
       break;
+
     case SCHEME_PAIR:
       free_scheme_object(object->value.pair.car);
       free_scheme_object(object->value.pair.cdr);
       break;
+
     case SCHEME_LAMBDA:
       free_scheme_object(object->value.lambda.params);
       free_scheme_object(object->value.lambda.body);
-      // free(object->value.lambda.env);
       break;
-    default: // SCHEME_NUMBER, SCHEME_BOOLEAN, SCHEME_PRIMITIVE e SCHEME_NIL
-      break;  // These types do not allocate memory dynamically, so nothing to free
+
+    default: // SCHEME_NUMBER and SCHEME_PRIMITIVE
+      break; // These types do not allocate memory dynamically, so nothing to free
   }
   free(object);
 }
