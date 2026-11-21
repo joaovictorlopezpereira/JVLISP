@@ -64,7 +64,6 @@ typedef enum {
   TOKEN_SYMBOL,     // Symbol (e.g., "+", "x")
   TOKEN_NUMBER,     // Number (e.g., "1", "42")
   TOKEN_STRING,     // String (e.g., "hello", "world")
-  TOKEN_NIL,        // '()
   TOKEN_EOF,        // End of input
 } TokenType;
 
